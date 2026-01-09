@@ -8,7 +8,7 @@ class CounterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final person = context.watchUrlParams(Person.fromMap);
+    final person = context.watchUrlParams(Person.fromJson);
     if (person == null) return NoOne();
 
     final isActive = person.status?.isActive ?? false;
