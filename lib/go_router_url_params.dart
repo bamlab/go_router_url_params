@@ -90,7 +90,10 @@ Map<String, String> _flattenParams(Map<String, dynamic> params) {
     if (entry.value is Map<String, dynamic>) {
       result.addAll(_flattenParams(entry.value as Map<String, dynamic>));
     } else {
-      result.putIfAbsent(entry.key, () => entry.value.toString());
+      final value = entry.value?.toString();
+      if (value != null) {
+        result.putIfAbsent(entry.key, () => value.toString());
+      }
     }
   }
   return result;
