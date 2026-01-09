@@ -52,6 +52,15 @@ class NoOne extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: const Center(child: Text('No one found')));
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: SelectableText(
+          GoRouter.of(context).state.uri.toString(),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ),
+      body: const Center(child: Text('No one found')),
+    );
   }
 }
