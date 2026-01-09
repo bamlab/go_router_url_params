@@ -1,5 +1,5 @@
 name: go_router_url_params
-description: "A new Flutter package project."
+description: "Easily keep your state in the url when using go_router in Flutter"
 version: 0.0.1
 
 environment:
