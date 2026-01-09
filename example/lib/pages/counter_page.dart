@@ -11,8 +11,8 @@ class CounterPage extends StatelessWidget {
     final person = context.watchUrlParams(Person.fromJson);
     if (person == null) return NoOne();
 
-    final isActive = person.status?.isActive ?? false;
-    final greeting = isActive ? 'Hello' : 'Goodbye';
+    final status = person.status ?? PersonStatus();
+    final greeting = status.isActive ? 'Hello' : 'Goodbye';
 
     return Scaffold(
       appBar: AppBar(
