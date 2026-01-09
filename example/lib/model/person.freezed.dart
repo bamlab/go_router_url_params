@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Person {
 
- String get name; int get age; PersonStatus? get status;
+ String get name;@JsonKey(fromJson: _parseAgeFromString) int get age; PersonStatus? get status;
 /// Create a copy of Person
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $PersonCopyWith<$Res>  {
   factory $PersonCopyWith(Person value, $Res Function(Person) _then) = _$PersonCopyWithImpl;
 @useResult
 $Res call({
- String name, int age, PersonStatus? status
+ String name,@JsonKey(fromJson: _parseAgeFromString) int age, PersonStatus? status
 });
 
 
@@ -167,7 +167,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  int age,  PersonStatus? status)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @JsonKey(fromJson: _parseAgeFromString)  int age,  PersonStatus? status)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Person() when $default != null:
 return $default(_that.name,_that.age,_that.status);case _:
@@ -188,7 +188,7 @@ return $default(_that.name,_that.age,_that.status);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  int age,  PersonStatus? status)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @JsonKey(fromJson: _parseAgeFromString)  int age,  PersonStatus? status)  $default,) {final _that = this;
 switch (_that) {
 case _Person():
 return $default(_that.name,_that.age,_that.status);case _:
@@ -208,7 +208,7 @@ return $default(_that.name,_that.age,_that.status);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  int age,  PersonStatus? status)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @JsonKey(fromJson: _parseAgeFromString)  int age,  PersonStatus? status)?  $default,) {final _that = this;
 switch (_that) {
 case _Person() when $default != null:
 return $default(_that.name,_that.age,_that.status);case _:
@@ -223,11 +223,11 @@ return $default(_that.name,_that.age,_that.status);case _:
 @JsonSerializable()
 
 class _Person extends Person {
-  const _Person({required this.name, this.age = 0, this.status}): super._();
+  const _Person({required this.name, @JsonKey(fromJson: _parseAgeFromString) this.age = 0, this.status}): super._();
   factory _Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
 
 @override final  String name;
-@override@JsonKey() final  int age;
+@override@JsonKey(fromJson: _parseAgeFromString) final  int age;
 @override final  PersonStatus? status;
 
 /// Create a copy of Person
@@ -263,7 +263,7 @@ abstract mixin class _$PersonCopyWith<$Res> implements $PersonCopyWith<$Res> {
   factory _$PersonCopyWith(_Person value, $Res Function(_Person) _then) = __$PersonCopyWithImpl;
 @override @useResult
 $Res call({
- String name, int age, PersonStatus? status
+ String name,@JsonKey(fromJson: _parseAgeFromString) int age, PersonStatus? status
 });
 
 
@@ -308,7 +308,7 @@ $PersonStatusCopyWith<$Res>? get status {
 /// @nodoc
 mixin _$PersonStatus {
 
- bool get isActive; String get label;
+@JsonKey(fromJson: _parseIsActiveFromString) bool get isActive; String get label;
 /// Create a copy of PersonStatus
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -341,7 +341,7 @@ abstract mixin class $PersonStatusCopyWith<$Res>  {
   factory $PersonStatusCopyWith(PersonStatus value, $Res Function(PersonStatus) _then) = _$PersonStatusCopyWithImpl;
 @useResult
 $Res call({
- bool isActive, String label
+@JsonKey(fromJson: _parseIsActiveFromString) bool isActive, String label
 });
 
 
@@ -447,7 +447,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isActive,  String label)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _parseIsActiveFromString)  bool isActive,  String label)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PersonStatus() when $default != null:
 return $default(_that.isActive,_that.label);case _:
@@ -468,7 +468,7 @@ return $default(_that.isActive,_that.label);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isActive,  String label)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(fromJson: _parseIsActiveFromString)  bool isActive,  String label)  $default,) {final _that = this;
 switch (_that) {
 case _PersonStatus():
 return $default(_that.isActive,_that.label);case _:
@@ -488,7 +488,7 @@ return $default(_that.isActive,_that.label);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isActive,  String label)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(fromJson: _parseIsActiveFromString)  bool isActive,  String label)?  $default,) {final _that = this;
 switch (_that) {
 case _PersonStatus() when $default != null:
 return $default(_that.isActive,_that.label);case _:
@@ -503,10 +503,10 @@ return $default(_that.isActive,_that.label);case _:
 @JsonSerializable()
 
 class _PersonStatus extends PersonStatus {
-  const _PersonStatus({this.isActive = true, this.label = 'Active'}): super._();
+  const _PersonStatus({@JsonKey(fromJson: _parseIsActiveFromString) this.isActive = true, this.label = 'Active'}): super._();
   factory _PersonStatus.fromJson(Map<String, dynamic> json) => _$PersonStatusFromJson(json);
 
-@override@JsonKey() final  bool isActive;
+@override@JsonKey(fromJson: _parseIsActiveFromString) final  bool isActive;
 @override@JsonKey() final  String label;
 
 /// Create a copy of PersonStatus
@@ -542,7 +542,7 @@ abstract mixin class _$PersonStatusCopyWith<$Res> implements $PersonStatusCopyWi
   factory _$PersonStatusCopyWith(_PersonStatus value, $Res Function(_PersonStatus) _then) = __$PersonStatusCopyWithImpl;
 @override @useResult
 $Res call({
- bool isActive, String label
+@JsonKey(fromJson: _parseIsActiveFromString) bool isActive, String label
 });
 
 

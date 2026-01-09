@@ -11,7 +11,7 @@ abstract class Person extends UrlParamsData with _$Person {
   const Person._() : super();
   const factory Person({
     required String name,
-    @Default(0) int age,
+    @JsonKey(fromJson: _parseAgeFromString) @Default(0) int age,
     PersonStatus? status,
   }) = _Person;
 
@@ -22,10 +22,14 @@ abstract class Person extends UrlParamsData with _$Person {
 abstract class PersonStatus extends UrlParamsData with _$PersonStatus {
   const PersonStatus._() : super();
   const factory PersonStatus({
-    @Default(true) bool isActive,
+    @JsonKey(fromJson: _parseIsActiveFromString) @Default(true) bool isActive,
     @Default('Active') String label,
   }) = _PersonStatus;
 
   factory PersonStatus.fromJson(Map<String, dynamic> json) =>
       _$PersonStatusFromJson(json);
 }
+
+int _parseAgeFromString(String value) => int.tryParse(value) ?? 0;
+
+bool _parseIsActiveFromString(String value) => bool.tryParse(value) ?? true;
