@@ -36,7 +36,7 @@ extension UrlParamsUtils on BuildContext {
   }
 
   void setUrlParams(UrlParamsData params) {
-    final flattenedParams = _flattenParams(params.toMap());
+    final flattenedParams = _flattenParams(params.toJson());
 
     final pathParamsKeys = GoRouter.of(this).state.pathParameters.keys;
     final pathParams = Map.fromEntries(
