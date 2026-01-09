@@ -9,15 +9,17 @@ part of 'person.dart';
 _Person _$PersonFromJson(Map<String, dynamic> json) => _Person(
   name: json['name'] as String,
   age: json['age'] == null ? 0 : _parseAgeFromString(json['age'] as String),
-  status: json['status'] == null
+  status: _readStatusFromString(json, 'status') == null
       ? null
-      : PersonStatus.fromJson(json['status'] as Map<String, dynamic>),
+      : PersonStatus.fromJson(
+          _readStatusFromString(json, 'status') as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$PersonToJson(_Person instance) => <String, dynamic>{
   'name': instance.name,
   'age': instance.age,
-  'status': instance.status,
+  'status': _writeStatusToJson(instance.status),
 };
 
 _PersonStatus _$PersonStatusFromJson(Map<String, dynamic> json) =>

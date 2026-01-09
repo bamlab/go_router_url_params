@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Person {
 
- String get name;@JsonKey(fromJson: _parseAgeFromString) int get age; PersonStatus? get status;
+ String get name;@JsonKey(fromJson: _parseAgeFromString) int get age;@JsonKey(readValue: _readStatusFromString, toJson: _writeStatusToJson) PersonStatus? get status;
 /// Create a copy of Person
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $PersonCopyWith<$Res>  {
   factory $PersonCopyWith(Person value, $Res Function(Person) _then) = _$PersonCopyWithImpl;
 @useResult
 $Res call({
- String name,@JsonKey(fromJson: _parseAgeFromString) int age, PersonStatus? status
+ String name,@JsonKey(fromJson: _parseAgeFromString) int age,@JsonKey(readValue: _readStatusFromString, toJson: _writeStatusToJson) PersonStatus? status
 });
 
 
@@ -167,7 +167,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @JsonKey(fromJson: _parseAgeFromString)  int age,  PersonStatus? status)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @JsonKey(fromJson: _parseAgeFromString)  int age, @JsonKey(readValue: _readStatusFromString, toJson: _writeStatusToJson)  PersonStatus? status)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Person() when $default != null:
 return $default(_that.name,_that.age,_that.status);case _:
@@ -188,7 +188,7 @@ return $default(_that.name,_that.age,_that.status);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @JsonKey(fromJson: _parseAgeFromString)  int age,  PersonStatus? status)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @JsonKey(fromJson: _parseAgeFromString)  int age, @JsonKey(readValue: _readStatusFromString, toJson: _writeStatusToJson)  PersonStatus? status)  $default,) {final _that = this;
 switch (_that) {
 case _Person():
 return $default(_that.name,_that.age,_that.status);case _:
@@ -208,7 +208,7 @@ return $default(_that.name,_that.age,_that.status);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @JsonKey(fromJson: _parseAgeFromString)  int age,  PersonStatus? status)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @JsonKey(fromJson: _parseAgeFromString)  int age, @JsonKey(readValue: _readStatusFromString, toJson: _writeStatusToJson)  PersonStatus? status)?  $default,) {final _that = this;
 switch (_that) {
 case _Person() when $default != null:
 return $default(_that.name,_that.age,_that.status);case _:
@@ -223,12 +223,12 @@ return $default(_that.name,_that.age,_that.status);case _:
 @JsonSerializable()
 
 class _Person extends Person {
-  const _Person({required this.name, @JsonKey(fromJson: _parseAgeFromString) this.age = 0, this.status}): super._();
+  const _Person({required this.name, @JsonKey(fromJson: _parseAgeFromString) this.age = 0, @JsonKey(readValue: _readStatusFromString, toJson: _writeStatusToJson) this.status}): super._();
   factory _Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
 
 @override final  String name;
 @override@JsonKey(fromJson: _parseAgeFromString) final  int age;
-@override final  PersonStatus? status;
+@override@JsonKey(readValue: _readStatusFromString, toJson: _writeStatusToJson) final  PersonStatus? status;
 
 /// Create a copy of Person
 /// with the given fields replaced by the non-null parameter values.
@@ -263,7 +263,7 @@ abstract mixin class _$PersonCopyWith<$Res> implements $PersonCopyWith<$Res> {
   factory _$PersonCopyWith(_Person value, $Res Function(_Person) _then) = __$PersonCopyWithImpl;
 @override @useResult
 $Res call({
- String name,@JsonKey(fromJson: _parseAgeFromString) int age, PersonStatus? status
+ String name,@JsonKey(fromJson: _parseAgeFromString) int age,@JsonKey(readValue: _readStatusFromString, toJson: _writeStatusToJson) PersonStatus? status
 });
 
 
