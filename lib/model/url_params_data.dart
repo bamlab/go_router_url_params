@@ -13,3 +13,13 @@ Map<String, dynamic>? readObjectFromString(
 
 Map<String, dynamic> writeObjectToJson<T extends UrlParamsData>(T? status) =>
     status?.toJson() ?? {};
+
+Object? tryParse(Map<dynamic, dynamic> json, String key) {
+  final value = json[key];
+  if (value == null) return null;
+
+  return int.tryParse(value) ??
+      double.tryParse(value) ??
+      bool.tryParse(value) ??
+      value.toString();
+}
