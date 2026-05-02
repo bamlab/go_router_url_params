@@ -133,8 +133,8 @@ class UrlParamBuilder<T extends UrlParamsData> {
 ///   builder: (context, child) => UrlParamsScope(
 ///     router: router,
 ///     builders: const [
-///       UrlParamBuilder(Person.fromJson),
-///       UrlParamBuilder(PersonStatus.fromJson),
+///       UrlParamBuilder<Person>(Person.fromJson),
+///       UrlParamBuilder<PersonStatus>(PersonStatus.fromJson),
 ///     ],
 ///     child: child ?? const SizedBox.shrink(),
 ///   ),
@@ -166,27 +166,56 @@ class UrlParamsScope extends StatefulWidget {
 }
 
 class _UrlParamsScopeState extends State<UrlParamsScope> {
+  Map<String, String> pathParams = const {};
+  Map<String, String> queryParams = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    widget.router.routerDelegate.addListener(_syncFromRouter);
+  }
+
+  @override
+  void didUpdateWidget(covariant UrlParamsScope oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.router != widget.router) {
+      oldWidget.router.routerDelegate.removeListener(_syncFromRouter);
+      widget.router.routerDelegate.addListener(_syncFromRouter);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.router.routerDelegate.removeListener(_syncFromRouter);
+    super.dispose();
+  }
+
+  void _syncFromRouter() {
+    if (!mounted) return;
+    final GoRouterState state;
+    try {
+      state = widget.router.state;
+    } catch (_) {
+      return;
+    }
+    try {
+      setState(() {
+        pathParams = state.pathParameters;
+        queryParams = state.uri.queryParameters;
+      });
+    } catch (_) {
+      return;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // The parent Router rebuilds and re-invokes MaterialApp.router's builder
-    // on every URL change, which causes this build() to re-run. So we read
-    // params freshly here without subscribing to the router ourselves.
-    Map<String, String> pathParams = const {};
-    Map<String, String> queryParams = const {};
-    try {
-      pathParams = widget.router.state.pathParameters;
-      queryParams = widget.router.state.uri.queryParameters;
-    } catch (_) {
-      // Route not yet matched on the very first frame.
-    }
-    final builders = <Type, UrlParamsDataBuilder>{
-      for (final entry in widget.builders) entry.type: entry.builder,
-    };
     return _UrlParamsModel(
       pathParams: pathParams,
       queryParams: queryParams,
-      builders: builders,
+      builders: {for (final e in widget.builders) e.type: e.builder},
       parseCache: <Type, UrlParamsData?>{},
+      flatCache: <Type, Map<String, String>?>{},
       child: widget.child,
     );
   }
@@ -238,6 +267,7 @@ class _UrlParamsModel extends InheritedModel<Object> {
     required this.queryParams,
     required this.builders,
     required this.parseCache,
+    required this.flatCache,
     required super.child,
   });
 
@@ -246,7 +276,21 @@ class _UrlParamsModel extends InheritedModel<Object> {
   final Map<Type, UrlParamsDataBuilder> builders;
   final Map<Type, UrlParamsData?> parseCache;
 
+  /// Flattened `toJson()` for each parsed type, populated alongside
+  /// [parseCache]. Used by [updateShouldNotifyDependent] to detect changes
+  /// without calling `toJson()` per dependent.
+  final Map<Type, Map<String, String>?> flatCache;
+
   T? parse<T extends UrlParamsData>() => _parseForType(T) as T?;
+
+  /// Returns the flattened `toJson()` representation of the parsed value
+  /// for [type], computing and caching it (and the parsed instance) on
+  /// first access. Returns `null` if no builder is registered for [type]
+  /// or if the builder threw.
+  Map<String, String>? _flatFor(Type type) {
+    _parseForType(type);
+    return flatCache[type];
+  }
 
   UrlParamsData? _parseForType(Type type) {
     if (parseCache.containsKey(type)) {
@@ -262,6 +306,7 @@ class _UrlParamsModel extends InheritedModel<Object> {
       }
     }
     parseCache[type] = result;
+    flatCache[type] = result == null ? null : _flattenParams(result.toJson());
     return result;
   }
 
@@ -286,8 +331,10 @@ class _UrlParamsModel extends InheritedModel<Object> {
           return true;
         }
       } else if (aspect is _TypeAspect) {
-        if (oldWidget._parseForType(aspect.type) !=
-            _parseForType(aspect.type)) {
+        if (!mapEquals(
+          oldWidget._flatFor(aspect.type),
+          _flatFor(aspect.type),
+        )) {
           return true;
         }
       }
