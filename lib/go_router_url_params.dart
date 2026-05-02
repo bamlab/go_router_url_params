@@ -86,21 +86,19 @@ extension UrlParamsUtils on BuildContext {
   /// final person = context.watchUrlParams(Person.fromJson);
   /// ```
   /// Uses the [T]'s serialization logic to parse the URL params.
-  /// The deserialization logic can be executed only once per url change if:
-  /// - A [UrlParamsScope] ancestor is present
-  /// - A stable function reference is passed to the [builder] parameter (
-  ///   a declared function, a static method tear-off or a factory
-  ///   constructor tear-off such as `MyUrlParamsData.fromJson`).
-  ///   Inline closures, like `(json) => MyUrlParamsData.fromJson(json)`,
-  ///   allocate a new function per build and silently disable both caching
-  ///   and aspect-based rebuild skipping.
   ///
-  /// Without this two conditions the call still works but the deserialization logic is executed
-  /// once per caller of the [watchUrlParams] method whenever the URL changes.
+  /// When a [UrlParamsScope] ancestor is present, the parsed result is cached
+  /// per [T] for the lifetime of a URL, so the [builder] runs at most once
+  /// per URL change regardless of how many widgets read the same [T] and
+  /// regardless of whether [builder] is a tear-off or an inline closure.
+  ///
+  /// Without a [UrlParamsScope] ancestor the call still works but the
+  /// deserialization logic is executed once per caller whenever the URL
+  /// changes.
   T? watchUrlParams<T extends UrlParamsData>(UrlParamsDataBuilder<T> builder) {
     final model = InheritedModel.inheritFrom<_UrlParamsModel>(
       this,
-      aspect: builder,
+      aspect: _BuilderAspect<T>(builder),
     );
     if (model != null) {
       return model.parse<T>(builder);
@@ -165,7 +163,7 @@ class _UrlParamsScopeState extends State<UrlParamsScope> {
     return _UrlParamsModel(
       pathParams: pathParams,
       queryParams: queryParams,
-      parseCache: <Function, UrlParamsData?>{},
+      parseCache: <Type, UrlParamsData?>{},
       child: widget.child,
     );
   }
@@ -194,6 +192,27 @@ class _PathKeyAspect {
   int get hashCode => Object.hash(_PathKeyAspect, key);
 }
 
+/// Aspect that identifies a typed URL params consumer.
+///
+/// Equality is based solely on [T], so two aspects produced from the same
+/// type but different [builder] instances (e.g. an inline closure rebuilt
+/// each frame) deduplicate correctly in the dependency set and share the
+/// same cache slot. The [builder] is carried for use during dispatch when
+/// the model needs to compute the parsed value against the old map.
+class _BuilderAspect<T extends UrlParamsData> {
+  _BuilderAspect(this.builder) : type = T;
+
+  final Type type;
+  final UrlParamsDataBuilder<T> builder;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _BuilderAspect && other.type == type;
+
+  @override
+  int get hashCode => type.hashCode;
+}
+
 class _UrlParamsModel extends InheritedModel<Object> {
   const _UrlParamsModel({
     required this.pathParams,
@@ -204,11 +223,11 @@ class _UrlParamsModel extends InheritedModel<Object> {
 
   final Map<String, String> pathParams;
   final Map<String, String> queryParams;
-  final Map<Function, UrlParamsData?> parseCache;
+  final Map<Type, UrlParamsData?> parseCache;
 
   T? parse<T extends UrlParamsData>(UrlParamsDataBuilder<T> builder) {
-    if (parseCache.containsKey(builder)) {
-      return parseCache[builder] as T?;
+    if (parseCache.containsKey(T)) {
+      return parseCache[T] as T?;
     }
     T? result;
     try {
@@ -216,21 +235,21 @@ class _UrlParamsModel extends InheritedModel<Object> {
     } catch (_) {
       result = null;
     }
-    parseCache[builder] = result;
+    parseCache[T] = result;
     return result;
   }
 
-  UrlParamsData? _parseUntyped(UrlParamsDataBuilder builder) {
-    if (parseCache.containsKey(builder)) {
-      return parseCache[builder];
+  UrlParamsData? _parseFromAspect(_BuilderAspect aspect) {
+    if (parseCache.containsKey(aspect.type)) {
+      return parseCache[aspect.type];
     }
     UrlParamsData? result;
     try {
-      result = builder({...queryParams, ...pathParams});
+      result = aspect.builder({...queryParams, ...pathParams});
     } catch (_) {
       result = null;
     }
-    parseCache[builder] = result;
+    parseCache[aspect.type] = result;
     return result;
   }
 
@@ -254,8 +273,8 @@ class _UrlParamsModel extends InheritedModel<Object> {
         if (pathParams[aspect.key] != oldWidget.pathParams[aspect.key]) {
           return true;
         }
-      } else if (aspect is UrlParamsDataBuilder) {
-        if (oldWidget._parseUntyped(aspect) != _parseUntyped(aspect)) {
+      } else if (aspect is _BuilderAspect) {
+        if (oldWidget._parseFromAspect(aspect) != _parseFromAspect(aspect)) {
           return true;
         }
       }
