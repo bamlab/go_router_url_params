@@ -1,3 +1,4 @@
+import 'package:example/model/person.dart';
 import 'package:example/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router_url_params/go_router_url_params.dart';
@@ -17,8 +18,14 @@ class MyApp extends StatelessWidget {
       routerDelegate: router.routerDelegate,
       routeInformationParser: router.routeInformationParser,
       routeInformationProvider: router.routeInformationProvider,
-      builder: (context, child) =>
-          UrlParamsScope(router: router, child: child!),
+      builder: (context, child) => UrlParamsScope(
+        router: router,
+        builders: [
+          UrlParamBuilder(Person.fromJson),
+          UrlParamBuilder(PersonStatus.fromJson),
+        ],
+        child: child!,
+      ),
     );
   }
 }

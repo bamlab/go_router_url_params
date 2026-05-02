@@ -83,50 +83,59 @@ extension UrlParamsUtils on BuildContext {
   ///
   /// Example:
   /// ```dart
-  /// final person = context.watchUrlParams(Person.fromJson);
+  /// final person = context.watchUrlParams<Person>();
   /// ```
-  /// Uses the [T]'s serialization logic to parse the URL params.
   ///
-  /// When a [UrlParamsScope] ancestor is present, the parsed result is cached
-  /// per [T] for the lifetime of a URL, so the [builder] runs at most once
-  /// per URL change regardless of how many widgets read the same [T] and
-  /// regardless of whether [builder] is a tear-off or an inline closure.
+  /// Requires a [UrlParamsScope] ancestor that registered a
+  /// [UrlParamBuilder] for [T]. The parsed result is cached per [T] for
+  /// the lifetime of a URL, so the registered builder runs at most once
+  /// per URL change regardless of how many widgets read the same [T].
   ///
-  /// Without a [UrlParamsScope] ancestor the call still works but the
-  /// deserialization logic is executed once per caller whenever the URL
-  /// changes.
-  T? watchUrlParams<T extends UrlParamsData>(UrlParamsDataBuilder<T> builder) {
+  /// Returns `null` if no scope is found or if no builder is registered
+  /// for [T].
+  T? watchUrlParams<T extends UrlParamsData>() {
     final model = InheritedModel.inheritFrom<_UrlParamsModel>(
       this,
-      aspect: _BuilderAspect<T>(builder),
+      aspect: _TypeAspect(T),
     );
-    if (model != null) {
-      return model.parse<T>(builder);
-    }
-    // fall back to the router's state, no caching for serialization/deserialization
-    final router = GoRouter.of(this);
-    try {
-      return builder({
-        ...router.state.uri.queryParameters,
-        ...router.state.pathParameters,
-      });
-    } catch (_) {
-      return null;
-    }
+    assert(
+      model != null,
+      'watchUrlParams<$T>() requires a UrlParamsScope ancestor with a '
+      'registered UrlParamBuilder<$T>.',
+    );
+    return model?.parse<T>();
   }
+}
+
+/// Typed registration entry used by [UrlParamsScope.builders].
+///
+/// One [UrlParamBuilder] per concrete [UrlParamsData] subclass tells the
+/// scope how to deserialize that type from the URL.
+class UrlParamBuilder<T extends UrlParamsData> {
+  const UrlParamBuilder(this.builder);
+
+  final UrlParamsDataBuilder<T> builder;
+
+  Type get type => T;
 }
 
 /// Caches parsed URL params and scopes rebuilds to consumers whose slice
 /// of the URL actually changed.
 ///
-/// Place once below `MaterialApp.router` via the `builder:` argument and pass
-/// the same [GoRouter] instance you gave to `MaterialApp.router`:
+/// Place once below `MaterialApp.router` via the `builder:` argument, pass
+/// the same [GoRouter] instance you gave to `MaterialApp.router`, and
+/// register one [UrlParamBuilder] per [UrlParamsData] subclass that any
+/// widget will read with [UrlParamsUtils.watchUrlParams]:
 ///
 /// ```dart
 /// MaterialApp.router(
 ///   routerConfig: router,
 ///   builder: (context, child) => UrlParamsScope(
 ///     router: router,
+///     builders: const [
+///       UrlParamBuilder(Person.fromJson),
+///       UrlParamBuilder(PersonStatus.fromJson),
+///     ],
 ///     child: child ?? const SizedBox.shrink(),
 ///   ),
 /// )
@@ -137,9 +146,19 @@ extension UrlParamsUtils on BuildContext {
 /// [UrlParamsUtils.watchQueryParamFromKey] or [UrlParamsUtils.watchPathParamFromKey]
 /// only rebuild when the slice they read changed.
 class UrlParamsScope extends StatefulWidget {
-  const UrlParamsScope({super.key, required this.router, required this.child});
+  const UrlParamsScope({
+    super.key,
+    required this.router,
+    this.builders = const [],
+    required this.child,
+  });
 
   final GoRouter router;
+
+  /// One entry per [UrlParamsData] subclass that widgets will read.
+  /// Looked up by [Type] from [UrlParamsUtils.watchUrlParams].
+  final List<UrlParamBuilder> builders;
+
   final Widget child;
 
   @override
@@ -160,9 +179,13 @@ class _UrlParamsScopeState extends State<UrlParamsScope> {
     } catch (_) {
       // Route not yet matched on the very first frame.
     }
+    final builders = <Type, UrlParamsDataBuilder>{
+      for (final entry in widget.builders) entry.type: entry.builder,
+    };
     return _UrlParamsModel(
       pathParams: pathParams,
       queryParams: queryParams,
+      builders: builders,
       parseCache: <Type, UrlParamsData?>{},
       child: widget.child,
     );
@@ -192,22 +215,18 @@ class _PathKeyAspect {
   int get hashCode => Object.hash(_PathKeyAspect, key);
 }
 
-/// Aspect that identifies a typed URL params consumer.
+/// Aspect that identifies a typed URL params consumer by its [Type].
 ///
-/// Equality is based solely on [T], so two aspects produced from the same
-/// type but different [builder] instances (e.g. an inline closure rebuilt
-/// each frame) deduplicate correctly in the dependency set and share the
-/// same cache slot. The [builder] is carried for use during dispatch when
-/// the model needs to compute the parsed value against the old map.
-class _BuilderAspect<T extends UrlParamsData> {
-  _BuilderAspect(this.builder) : type = T;
+/// The actual builder lives on the [_UrlParamsModel] (registered once on
+/// the [UrlParamsScope]), so the aspect only needs to carry the [Type] to
+/// look it up during dispatch.
+class _TypeAspect {
+  const _TypeAspect(this.type);
 
   final Type type;
-  final UrlParamsDataBuilder<T> builder;
 
   @override
-  bool operator ==(Object other) =>
-      other is _BuilderAspect && other.type == type;
+  bool operator ==(Object other) => other is _TypeAspect && other.type == type;
 
   @override
   int get hashCode => type.hashCode;
@@ -217,39 +236,32 @@ class _UrlParamsModel extends InheritedModel<Object> {
   const _UrlParamsModel({
     required this.pathParams,
     required this.queryParams,
+    required this.builders,
     required this.parseCache,
     required super.child,
   });
 
   final Map<String, String> pathParams;
   final Map<String, String> queryParams;
+  final Map<Type, UrlParamsDataBuilder> builders;
   final Map<Type, UrlParamsData?> parseCache;
 
-  T? parse<T extends UrlParamsData>(UrlParamsDataBuilder<T> builder) {
-    if (parseCache.containsKey(T)) {
-      return parseCache[T] as T?;
-    }
-    T? result;
-    try {
-      result = builder({...queryParams, ...pathParams});
-    } catch (_) {
-      result = null;
-    }
-    parseCache[T] = result;
-    return result;
-  }
+  T? parse<T extends UrlParamsData>() => _parseForType(T) as T?;
 
-  UrlParamsData? _parseFromAspect(_BuilderAspect aspect) {
-    if (parseCache.containsKey(aspect.type)) {
-      return parseCache[aspect.type];
+  UrlParamsData? _parseForType(Type type) {
+    if (parseCache.containsKey(type)) {
+      return parseCache[type];
     }
+    final builder = builders[type];
     UrlParamsData? result;
-    try {
-      result = aspect.builder({...queryParams, ...pathParams});
-    } catch (_) {
-      result = null;
+    if (builder != null) {
+      try {
+        result = builder({...queryParams, ...pathParams});
+      } catch (_) {
+        result = null;
+      }
     }
-    parseCache[aspect.type] = result;
+    parseCache[type] = result;
     return result;
   }
 
@@ -273,8 +285,9 @@ class _UrlParamsModel extends InheritedModel<Object> {
         if (pathParams[aspect.key] != oldWidget.pathParams[aspect.key]) {
           return true;
         }
-      } else if (aspect is _BuilderAspect) {
-        if (oldWidget._parseFromAspect(aspect) != _parseFromAspect(aspect)) {
+      } else if (aspect is _TypeAspect) {
+        if (oldWidget._parseForType(aspect.type) !=
+            _parseForType(aspect.type)) {
           return true;
         }
       }

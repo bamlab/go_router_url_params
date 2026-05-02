@@ -17,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   );
   @override
   Widget build(BuildContext context) {
-    final status = context.watchUrlParams(PersonStatus.fromJson);
+    final status = context.watchUrlParams<PersonStatus>();
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -65,7 +65,7 @@ class StatusSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = context.watchUrlParams(PersonStatus.fromJson);
+    final status = context.watchUrlParams<PersonStatus>();
     if (status == null) return const SizedBox.shrink();
 
     return Switch(
