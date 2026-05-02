@@ -60,7 +60,7 @@ class NoOne extends StatelessWidget {
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ),
-      body: const Center(child: Text('No one found')),
+      body: const Center(child: Text('Nobody found')),
     );
   }
 }

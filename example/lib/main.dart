@@ -1,5 +1,6 @@
 import 'package:example/router/router.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router_url_params/go_router_url_params.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,6 +17,8 @@ class MyApp extends StatelessWidget {
       routerDelegate: router.routerDelegate,
       routeInformationParser: router.routeInformationParser,
       routeInformationProvider: router.routeInformationProvider,
+      builder: (context, child) =>
+          UrlParamsScope(router: router, child: child!),
     );
   }
 }

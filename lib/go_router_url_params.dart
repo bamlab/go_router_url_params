@@ -1,5 +1,6 @@
 export 'model/url_params_data.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:go_router_url_params/model/url_params_data.dart';
@@ -9,8 +10,11 @@ extension UrlParamsUtils on BuildContext {
     Map<String, dynamic> queryParams = const {},
     Map<String, dynamic> pathParams = const {},
   }) {
+    final router = GoRouter.of(this);
+    // Intentionally non-subscribing: callers mutate the URL from callbacks
+    // and must not rebuild on every URL change as a side effect.
     final newQueryParameters = {
-      ...GoRouter.of(this).state.uri.queryParameters,
+      ...router.state.uri.queryParameters,
       ...Map.fromEntries(
         queryParams.entries
             .map((entry) => MapEntry(entry.key, entry.value?.toString()))
@@ -19,16 +23,13 @@ extension UrlParamsUtils on BuildContext {
       ),
     };
     final newPathParameters = {
-      ...GoRouter.of(this).state.pathParameters,
+      ...router.state.pathParameters,
       ...pathParams.map((key, value) => MapEntry(key, value.toString())),
     };
     GoRouter.of(this).go(
-      GoRouter.of(this).state.uri
+      router.state.uri
           .replace(
-            path: _formatPath(
-              GoRouter.of(this).state.fullPath ?? '',
-              newPathParameters,
-            ),
+            path: _formatPath(router.state.fullPath ?? '', newPathParameters),
             queryParameters: newQueryParameters,
           )
           .toString(),
@@ -55,23 +56,211 @@ extension UrlParamsUtils on BuildContext {
   }
 
   T? watchQueryParamFromKey<T>(String key) {
-    final queryParams = GoRouter.of(this).state.uri.queryParameters;
-    return _tryParse<T>(queryParams[key]);
+    final model = InheritedModel.inheritFrom<_UrlParamsModel>(
+      this,
+      aspect: _QueryKeyAspect(key),
+    );
+    if (model != null) {
+      return _tryParse<T>(model.queryParams[key]);
+    }
+    // fall back to the router's state, no caching for serialization/deserialization
+    return _tryParse<T>(GoRouter.of(this).state.uri.queryParameters[key]);
   }
 
   T? watchPathParamFromKey<T>(String key) {
-    final pathParams = GoRouter.of(this).state.pathParameters;
-    return _tryParse<T>(pathParams[key]);
+    final model = InheritedModel.inheritFrom<_UrlParamsModel>(
+      this,
+      aspect: _PathKeyAspect(key),
+    );
+    if (model != null) {
+      return _tryParse<T>(model.pathParams[key]);
+    }
+    // fall back to the router's state, no caching for serialization/deserialization
+    return _tryParse<T>(GoRouter.of(this).state.pathParameters[key]);
   }
 
+  /// Reads typed URL params and rebuilds only when the parsed [T] changes.
+  ///
+  /// Example:
+  /// ```dart
+  /// final person = context.watchUrlParams(Person.fromJson);
+  /// ```
+  /// Uses the [T]'s serialization logic to parse the URL params.
+  /// The deserialization logic can be executed only once per url change if:
+  /// - A [UrlParamsScope] ancestor is present
+  /// - A stable function reference is passed to the [builder] parameter (
+  ///   a declared function, a static method tear-off or a factory
+  ///   constructor tear-off such as `MyUrlParamsData.fromJson`).
+  ///   Inline closures, like `(json) => MyUrlParamsData.fromJson(json)`,
+  ///   allocate a new function per build and silently disable both caching
+  ///   and aspect-based rebuild skipping.
+  ///
+  /// Without this two conditions the call still works but the deserialization logic is executed
+  /// once per caller of the [watchUrlParams] method whenever the URL changes.
   T? watchUrlParams<T extends UrlParamsData>(UrlParamsDataBuilder<T> builder) {
-    final pathParams = GoRouter.of(this).state.pathParameters;
-    final queryParams = GoRouter.of(this).state.uri.queryParameters;
+    final model = InheritedModel.inheritFrom<_UrlParamsModel>(
+      this,
+      aspect: builder,
+    );
+    if (model != null) {
+      return model.parse<T>(builder);
+    }
+    // fall back to the router's state, no caching for serialization/deserialization
+    final router = GoRouter.of(this);
     try {
-      return builder({...queryParams, ...pathParams});
-    } catch (e) {
+      return builder({
+        ...router.state.uri.queryParameters,
+        ...router.state.pathParameters,
+      });
+    } catch (_) {
       return null;
     }
+  }
+}
+
+/// Caches parsed URL params and scopes rebuilds to consumers whose slice
+/// of the URL actually changed.
+///
+/// Place once below `MaterialApp.router` via the `builder:` argument and pass
+/// the same [GoRouter] instance you gave to `MaterialApp.router`:
+///
+/// ```dart
+/// MaterialApp.router(
+///   routerConfig: router,
+///   builder: (context, child) => UrlParamsScope(
+///     router: router,
+///     child: child ?? const SizedBox.shrink(),
+///   ),
+/// )
+/// ```
+///
+/// The scope subscribes to [GoRouter.routeInformationProvider] and republishes
+/// path/query parameters. Consumers using [UrlParamsUtils.watchUrlParams],
+/// [UrlParamsUtils.watchQueryParamFromKey] or [UrlParamsUtils.watchPathParamFromKey]
+/// only rebuild when the slice they read changed.
+class UrlParamsScope extends StatefulWidget {
+  const UrlParamsScope({super.key, required this.router, required this.child});
+
+  final GoRouter router;
+  final Widget child;
+
+  @override
+  State<UrlParamsScope> createState() => _UrlParamsScopeState();
+}
+
+class _UrlParamsScopeState extends State<UrlParamsScope> {
+  @override
+  Widget build(BuildContext context) {
+    // The parent Router rebuilds and re-invokes MaterialApp.router's builder
+    // on every URL change, which causes this build() to re-run. So we read
+    // params freshly here without subscribing to the router ourselves.
+    Map<String, String> pathParams = const {};
+    Map<String, String> queryParams = const {};
+    try {
+      pathParams = widget.router.state.pathParameters;
+      queryParams = widget.router.state.uri.queryParameters;
+    } catch (_) {
+      // Route not yet matched on the very first frame.
+    }
+    return _UrlParamsModel(
+      pathParams: pathParams,
+      queryParams: queryParams,
+      parseCache: <Function, UrlParamsData?>{},
+      child: widget.child,
+    );
+  }
+}
+
+class _QueryKeyAspect {
+  const _QueryKeyAspect(this.key);
+  final String key;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _QueryKeyAspect && other.key == key;
+
+  @override
+  int get hashCode => Object.hash(_QueryKeyAspect, key);
+}
+
+class _PathKeyAspect {
+  const _PathKeyAspect(this.key);
+  final String key;
+
+  @override
+  bool operator ==(Object other) => other is _PathKeyAspect && other.key == key;
+
+  @override
+  int get hashCode => Object.hash(_PathKeyAspect, key);
+}
+
+class _UrlParamsModel extends InheritedModel<Object> {
+  const _UrlParamsModel({
+    required this.pathParams,
+    required this.queryParams,
+    required this.parseCache,
+    required super.child,
+  });
+
+  final Map<String, String> pathParams;
+  final Map<String, String> queryParams;
+  final Map<Function, UrlParamsData?> parseCache;
+
+  T? parse<T extends UrlParamsData>(UrlParamsDataBuilder<T> builder) {
+    if (parseCache.containsKey(builder)) {
+      return parseCache[builder] as T?;
+    }
+    T? result;
+    try {
+      result = builder({...queryParams, ...pathParams});
+    } catch (_) {
+      result = null;
+    }
+    parseCache[builder] = result;
+    return result;
+  }
+
+  UrlParamsData? _parseUntyped(UrlParamsDataBuilder builder) {
+    if (parseCache.containsKey(builder)) {
+      return parseCache[builder];
+    }
+    UrlParamsData? result;
+    try {
+      result = builder({...queryParams, ...pathParams});
+    } catch (_) {
+      result = null;
+    }
+    parseCache[builder] = result;
+    return result;
+  }
+
+  @override
+  bool updateShouldNotify(_UrlParamsModel oldWidget) {
+    return !mapEquals(pathParams, oldWidget.pathParams) ||
+        !mapEquals(queryParams, oldWidget.queryParams);
+  }
+
+  @override
+  bool updateShouldNotifyDependent(
+    _UrlParamsModel oldWidget,
+    Set<Object> aspects,
+  ) {
+    for (final aspect in aspects) {
+      if (aspect is _QueryKeyAspect) {
+        if (queryParams[aspect.key] != oldWidget.queryParams[aspect.key]) {
+          return true;
+        }
+      } else if (aspect is _PathKeyAspect) {
+        if (pathParams[aspect.key] != oldWidget.pathParams[aspect.key]) {
+          return true;
+        }
+      } else if (aspect is UrlParamsDataBuilder) {
+        if (oldWidget._parseUntyped(aspect) != _parseUntyped(aspect)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
 
