@@ -8,7 +8,7 @@ part of 'person.dart';
 
 _Person _$PersonFromJson(Map<String, dynamic> json) => _Person(
   name: json['name'] as String,
-  age: (tryParse(json, 'age') as num?)?.toInt() ?? 0,
+  age: (UrlParamsData.tryParse(json, 'age') as num?)?.toInt() ?? 0,
   status: readObjectFromString(json, 'status') == null
       ? null
       : PersonStatus.fromJson(
@@ -24,7 +24,7 @@ Map<String, dynamic> _$PersonToJson(_Person instance) => <String, dynamic>{
 
 _PersonStatus _$PersonStatusFromJson(Map<String, dynamic> json) =>
     _PersonStatus(
-      isActive: tryParse(json, 'isActive') as bool? ?? true,
+      isActive: UrlParamsData.tryParse(json, 'isActive') as bool? ?? true,
       label: json['label'] as String? ?? 'Active',
     );
 

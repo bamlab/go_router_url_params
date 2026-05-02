@@ -11,7 +11,7 @@ abstract class Person extends UrlParamsData with _$Person {
   const Person._() : super();
   const factory Person({
     required String name,
-    @JsonKey(readValue: tryParse) @Default(0) int age,
+    @JsonKey(readValue: UrlParamsData.tryParse) @Default(0) int age,
     @JsonKey(readValue: readObjectFromString, toJson: writeObjectToJson)
     PersonStatus? status,
   }) = _Person;
@@ -23,7 +23,7 @@ abstract class Person extends UrlParamsData with _$Person {
 abstract class PersonStatus extends UrlParamsData with _$PersonStatus {
   const PersonStatus._() : super();
   const factory PersonStatus({
-    @JsonKey(readValue: tryParse) @Default(true) bool isActive,
+    @JsonKey(readValue: UrlParamsData.tryParse) @Default(true) bool isActive,
     @Default('Active') String label,
   }) = _PersonStatus;
 
