@@ -30,7 +30,7 @@ class CounterPage extends StatelessWidget {
             SizedBox(height: 8),
             const Text('You have pushed the button this many times:'),
             Text(
-              person.age.toString(),
+              person.status.labels.length.toString(),
               style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
@@ -38,7 +38,13 @@ class CounterPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.setUrlParams(person.copyWith(age: person.age + 1));
+          context.setUrlParams(
+            person.copyWith(
+              status: person.status.copyWith(
+                labels: [...person.status.labels, "hello"],
+              ),
+            ),
+          );
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

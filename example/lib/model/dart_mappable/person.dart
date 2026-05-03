@@ -3,7 +3,7 @@ import 'package:go_router_url_params/go_router_url_params.dart';
 
 part 'person.mapper.dart';
 
-enum PersonKeys { age, name, person, isActive, label }
+enum PersonKeys { age, name, person, isActive, labels }
 
 @MappableClass()
 class Person with PersonMappable, UrlParamsData {
@@ -16,7 +16,7 @@ class Person with PersonMappable, UrlParamsData {
 
 @MappableClass()
 class PersonStatus with PersonStatusMappable, UrlParamsData {
-  const PersonStatus({this.isActive = true, this.label});
+  const PersonStatus({this.isActive = true, this.labels = const []});
   final bool isActive;
-  final String? label;
+  final List<String> labels;
 }

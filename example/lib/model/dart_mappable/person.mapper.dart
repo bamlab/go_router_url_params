@@ -155,23 +155,24 @@ class PersonStatusMapper extends ClassMapperBase<PersonStatus> {
     opt: true,
     def: true,
   );
-  static String? _$label(PersonStatus v) => v.label;
-  static const Field<PersonStatus, String> _f$label = Field(
-    'label',
-    _$label,
+  static List<String> _$labels(PersonStatus v) => v.labels;
+  static const Field<PersonStatus, List<String>> _f$labels = Field(
+    'labels',
+    _$labels,
     opt: true,
+    def: const [],
   );
 
   @override
   final MappableFields<PersonStatus> fields = const {
     #isActive: _f$isActive,
-    #label: _f$label,
+    #labels: _f$labels,
   };
 
   static PersonStatus _instantiate(DecodingData data) {
     return PersonStatus(
       isActive: data.dec(_f$isActive),
-      label: data.dec(_f$label),
+      labels: data.dec(_f$labels),
     );
   }
 
@@ -237,7 +238,8 @@ extension PersonStatusValueCopy<$R, $Out>
 
 abstract class PersonStatusCopyWith<$R, $In extends PersonStatus, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
-  $R call({bool? isActive, String? label});
+  ListCopyWith<$R, String, ObjectCopyWith<$R, String, String>> get labels;
+  $R call({bool? isActive, List<String>? labels});
   PersonStatusCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
 
@@ -250,16 +252,23 @@ class _PersonStatusCopyWithImpl<$R, $Out>
   late final ClassMapperBase<PersonStatus> $mapper =
       PersonStatusMapper.ensureInitialized();
   @override
-  $R call({bool? isActive, Object? label = $none}) => $apply(
+  ListCopyWith<$R, String, ObjectCopyWith<$R, String, String>> get labels =>
+      ListCopyWith(
+        $value.labels,
+        (v, t) => ObjectCopyWith(v, $identity, t),
+        (v) => call(labels: v),
+      );
+  @override
+  $R call({bool? isActive, List<String>? labels}) => $apply(
     FieldCopyWithData({
       if (isActive != null) #isActive: isActive,
-      if (label != $none) #label: label,
+      if (labels != null) #labels: labels,
     }),
   );
   @override
   PersonStatus $make(CopyWithData data) => PersonStatus(
     isActive: data.get(#isActive, or: $value.isActive),
-    label: data.get(#label, or: $value.label),
+    labels: data.get(#labels, or: $value.labels),
   );
 
   @override
