@@ -622,5 +622,51 @@ void main() {
       await tester.pumpAndSettle();
       expect(observed?.age, 3);
     });
+
+    testWidgets('caching still works whe builder is not a tear off', (
+      tester,
+    ) async {
+      Person? observed;
+      final router = await pumpApp(
+        tester,
+        builders: [UrlParamBuilder<Person>((p) => Person.fromJson(p))],
+        initialLocation: '/?name=Alice&age=30',
+        child: Column(
+          children: List.generate(
+            4,
+            (i) => Probe(
+              id: 'probe$i',
+              builder: (context) {
+                observed = context.watchUrlParams<Person>();
+                return MaterialButton(
+                  onPressed: () {
+                    context.setUrlParams(Person(name: 'Bob', age: 5));
+                  },
+                  child: Text('Set URL Params $i'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      personParseCount = 0;
+      final initial0 = ProbeState.builds['probe0']!;
+      final initial1 = ProbeState.builds['probe1']!;
+      final initial2 = ProbeState.builds['probe2']!;
+      final initial3 = ProbeState.builds['probe3']!;
+      expect(observed?.name, 'Alice');
+      await tester.tap(find.text('Set URL Params 0'));
+      await tester.pumpAndSettle();
+
+      expect(ProbeState.builds['probe0'], initial0 + 1);
+      expect(ProbeState.builds['probe1'], initial1 + 1);
+      expect(ProbeState.builds['probe2'], initial2 + 1);
+      expect(ProbeState.builds['probe3'], initial3 + 1);
+      expect(personParseCount, 1);
+      expect(observed?.name, 'Bob');
+      expect(observed?.age, 5);
+      expect(router.state.uri.queryParameters['name'], 'Bob');
+      expect(router.state.uri.queryParameters['age'], '5');
+    });
   });
 }
