@@ -9,7 +9,7 @@ class CounterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final person = context.watchUrlParams<Person>();
-    if (person == null) return NoOne();
+    if (person == null) return Nobody();
 
     final status = person.status ?? PersonStatus();
     final greeting = status.isActive ? 'Hello' : 'Goodbye';
@@ -47,8 +47,8 @@ class CounterPage extends StatelessWidget {
   }
 }
 
-class NoOne extends StatelessWidget {
-  const NoOne({super.key});
+class Nobody extends StatelessWidget {
+  const Nobody({super.key});
 
   @override
   Widget build(BuildContext context) {
