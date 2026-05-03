@@ -16,7 +16,8 @@ abstract class Person with _$Person, UrlParamsData {
       readValue: UrlParamsData.readObjectFromString,
       toJson: UrlParamsData.writeObjectToJson,
     )
-    PersonStatus? status,
+    @Default(PersonStatus())
+    PersonStatus status,
   }) = _Person;
 
   factory Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);

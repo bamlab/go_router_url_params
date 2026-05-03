@@ -10,7 +10,7 @@ _Person _$PersonFromJson(Map<String, dynamic> json) => _Person(
   name: json['name'] as String,
   age: (UrlParamsData.tryParse(json, 'age') as num?)?.toInt() ?? 0,
   status: UrlParamsData.readObjectFromString(json, 'status') == null
-      ? null
+      ? const PersonStatus()
       : PersonStatus.fromJson(
           UrlParamsData.readObjectFromString(json, 'status')
               as Map<String, dynamic>,

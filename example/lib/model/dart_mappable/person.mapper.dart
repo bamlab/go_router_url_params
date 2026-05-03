@@ -32,7 +32,7 @@ class PersonMapper extends ClassMapperBase<Person> {
     opt: true,
     def: 0,
   );
-  static PersonStatus? _$status(Person v) => v.status;
+  static PersonStatus _$status(Person v) => v.status;
   static const Field<Person, PersonStatus> _f$status = Field(
     'status',
     _$status,
@@ -100,7 +100,7 @@ extension PersonValueCopy<$R, $Out> on ObjectCopyWith<$R, Person, $Out> {
 
 abstract class PersonCopyWith<$R, $In extends Person, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
-  PersonStatusCopyWith<$R, PersonStatus, PersonStatus>? get status;
+  PersonStatusCopyWith<$R, PersonStatus, PersonStatus> get status;
   $R call({String? name, int? age, PersonStatus? status});
   PersonCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
@@ -112,8 +112,8 @@ class _PersonCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, Person, $Out>
   @override
   late final ClassMapperBase<Person> $mapper = PersonMapper.ensureInitialized();
   @override
-  PersonStatusCopyWith<$R, PersonStatus, PersonStatus>? get status =>
-      $value.status?.copyWith.$chain((v) => call(status: v));
+  PersonStatusCopyWith<$R, PersonStatus, PersonStatus> get status =>
+      ($value.status as PersonStatus).copyWith.$chain((v) => call(status: v));
   @override
   $R call({Object? name = $none, int? age, Object? status = $none}) => $apply(
     FieldCopyWithData({

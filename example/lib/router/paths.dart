@@ -17,7 +17,7 @@ Path counter(Person person) => Path(
   '/counter/${person.name}',
   '/counter/${person.name}'
       '?${PersonKeys.age.name}=${person.age}'
-      '&${PersonKeys.isActive.name}=${person.status?.isActive}'
-      '&${PersonKeys.label.name}=${person.status?.label}',
+      '&${PersonKeys.isActive.name}=${person.status.isActive}'
+      '&${PersonKeys.label.name}=${person.status.label}',
   'counter',
 );

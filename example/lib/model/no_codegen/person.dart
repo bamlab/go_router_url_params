@@ -3,10 +3,11 @@ import 'package:go_router_url_params/go_router_url_params.dart';
 enum PersonKeys { age, name, person, isActive, label }
 
 class Person with UrlParamsData {
-  const Person({this.name, this.age = 0, this.status});
+  const Person({this.name, this.age = 0, PersonStatus? status})
+    : status = status ?? const PersonStatus();
   final String? name;
   final int age;
-  final PersonStatus? status;
+  final PersonStatus status;
 
   factory Person.fromMap(Map<String, dynamic> json) => Person(
     name: json['name'],
@@ -20,7 +21,7 @@ class Person with UrlParamsData {
   Map<String, dynamic> toMap() => {
     'name': name,
     'age': age,
-    'status': status?.toMap(),
+    'status': status.toMap(),
   };
 }
 

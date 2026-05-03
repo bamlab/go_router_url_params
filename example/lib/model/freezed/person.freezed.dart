@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Person {
 
- String get name;@JsonKey(readValue: UrlParamsData.tryParse) int get age;@JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson) PersonStatus? get status;
+ String get name;@JsonKey(readValue: UrlParamsData.tryParse) int get age;@JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson) PersonStatus get status;
 /// Create a copy of Person
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,11 +48,11 @@ abstract mixin class $PersonCopyWith<$Res>  {
   factory $PersonCopyWith(Person value, $Res Function(Person) _then) = _$PersonCopyWithImpl;
 @useResult
 $Res call({
- String name,@JsonKey(readValue: UrlParamsData.tryParse) int age,@JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson) PersonStatus? status
+ String name,@JsonKey(readValue: UrlParamsData.tryParse) int age,@JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson) PersonStatus status
 });
 
 
-$PersonStatusCopyWith<$Res>? get status;
+$PersonStatusCopyWith<$Res> get status;
 
 }
 /// @nodoc
@@ -65,24 +65,21 @@ class _$PersonCopyWithImpl<$Res>
 
 /// Create a copy of Person
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? age = null,Object? status = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? age = null,Object? status = null,}) {
   return _then(_self.copyWith(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,age: null == age ? _self.age : age // ignore: cast_nullable_to_non_nullable
-as int,status: freezed == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as PersonStatus?,
+as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as PersonStatus,
   ));
 }
 /// Create a copy of Person
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$PersonStatusCopyWith<$Res>? get status {
-    if (_self.status == null) {
-    return null;
-  }
-
-  return $PersonStatusCopyWith<$Res>(_self.status!, (value) {
+$PersonStatusCopyWith<$Res> get status {
+  
+  return $PersonStatusCopyWith<$Res>(_self.status, (value) {
     return _then(_self.copyWith(status: value));
   });
 }
@@ -167,7 +164,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @JsonKey(readValue: UrlParamsData.tryParse)  int age, @JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson)  PersonStatus? status)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @JsonKey(readValue: UrlParamsData.tryParse)  int age, @JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson)  PersonStatus status)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Person() when $default != null:
 return $default(_that.name,_that.age,_that.status);case _:
@@ -188,7 +185,7 @@ return $default(_that.name,_that.age,_that.status);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @JsonKey(readValue: UrlParamsData.tryParse)  int age, @JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson)  PersonStatus? status)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @JsonKey(readValue: UrlParamsData.tryParse)  int age, @JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson)  PersonStatus status)  $default,) {final _that = this;
 switch (_that) {
 case _Person():
 return $default(_that.name,_that.age,_that.status);case _:
@@ -208,7 +205,7 @@ return $default(_that.name,_that.age,_that.status);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @JsonKey(readValue: UrlParamsData.tryParse)  int age, @JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson)  PersonStatus? status)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @JsonKey(readValue: UrlParamsData.tryParse)  int age, @JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson)  PersonStatus status)?  $default,) {final _that = this;
 switch (_that) {
 case _Person() when $default != null:
 return $default(_that.name,_that.age,_that.status);case _:
@@ -223,12 +220,12 @@ return $default(_that.name,_that.age,_that.status);case _:
 @JsonSerializable()
 
 class _Person extends Person {
-  const _Person({required this.name, @JsonKey(readValue: UrlParamsData.tryParse) this.age = 0, @JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson) this.status}): super._();
+  const _Person({required this.name, @JsonKey(readValue: UrlParamsData.tryParse) this.age = 0, @JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson) this.status = const PersonStatus()}): super._();
   factory _Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
 
 @override final  String name;
 @override@JsonKey(readValue: UrlParamsData.tryParse) final  int age;
-@override@JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson) final  PersonStatus? status;
+@override@JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson) final  PersonStatus status;
 
 /// Create a copy of Person
 /// with the given fields replaced by the non-null parameter values.
@@ -263,11 +260,11 @@ abstract mixin class _$PersonCopyWith<$Res> implements $PersonCopyWith<$Res> {
   factory _$PersonCopyWith(_Person value, $Res Function(_Person) _then) = __$PersonCopyWithImpl;
 @override @useResult
 $Res call({
- String name,@JsonKey(readValue: UrlParamsData.tryParse) int age,@JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson) PersonStatus? status
+ String name,@JsonKey(readValue: UrlParamsData.tryParse) int age,@JsonKey(readValue: UrlParamsData.readObjectFromString, toJson: UrlParamsData.writeObjectToJson) PersonStatus status
 });
 
 
-@override $PersonStatusCopyWith<$Res>? get status;
+@override $PersonStatusCopyWith<$Res> get status;
 
 }
 /// @nodoc
@@ -280,12 +277,12 @@ class __$PersonCopyWithImpl<$Res>
 
 /// Create a copy of Person
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? age = null,Object? status = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? age = null,Object? status = null,}) {
   return _then(_Person(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,age: null == age ? _self.age : age // ignore: cast_nullable_to_non_nullable
-as int,status: freezed == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as PersonStatus?,
+as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as PersonStatus,
   ));
 }
 
@@ -293,12 +290,9 @@ as PersonStatus?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$PersonStatusCopyWith<$Res>? get status {
-    if (_self.status == null) {
-    return null;
-  }
-
-  return $PersonStatusCopyWith<$Res>(_self.status!, (value) {
+$PersonStatusCopyWith<$Res> get status {
+  
+  return $PersonStatusCopyWith<$Res>(_self.status, (value) {
     return _then(_self.copyWith(status: value));
   });
 }

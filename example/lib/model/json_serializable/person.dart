@@ -7,11 +7,12 @@ enum PersonKeys { age, name, person, isActive, label }
 
 @JsonSerializable()
 class Person with UrlParamsData {
-  const Person({this.name, this.age = 0, this.status});
+  const Person({this.name, this.age = 0, PersonStatus? status})
+    : status = status ?? const PersonStatus();
   final String? name;
   @JsonKey(readValue: UrlParamsData.tryParse)
   final int age;
-  final PersonStatus? status;
+  final PersonStatus status;
 
   factory Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
   factory Person.fromMap(Map<String, dynamic> json) => Person.fromJson(json);

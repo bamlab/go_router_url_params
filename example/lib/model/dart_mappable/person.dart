@@ -7,10 +7,11 @@ enum PersonKeys { age, name, person, isActive, label }
 
 @MappableClass()
 class Person with PersonMappable, UrlParamsData {
-  const Person({this.name, this.age = 0, this.status});
+  const Person({this.name, this.age = 0, PersonStatus? status})
+    : status = status ?? const PersonStatus();
   final String? name;
   final int age;
-  final PersonStatus? status;
+  final PersonStatus status;
 }
 
 @MappableClass()
