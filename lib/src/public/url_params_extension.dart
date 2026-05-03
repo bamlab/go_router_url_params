@@ -54,6 +54,18 @@ extension UrlParamsExtension on BuildContext {
     setUrlParamsFromMap(queryParams: queryParams, pathParams: pathParams);
   }
 
+  /// Reads typed query param and rebuilds only when this specific
+  /// query parameter changes.
+  ///
+  /// Example:
+  /// ```dart
+  /// final age = context.watchQueryParamFromKey('age'); // age is int or null
+  /// ```
+  /// Returns `null` if no query param is found or if the function
+  /// fails to parse the value from String to [T].
+  ///
+  /// Currently, only the following types are supported:
+  /// String, int, double, bool, DateTime.
   T? watchQueryParamFromKey<T>(String key) {
     final model = InheritedModel.inheritFrom<UrlParamsModel>(
       this,
@@ -62,10 +74,22 @@ extension UrlParamsExtension on BuildContext {
     if (model != null) {
       return tryParse<T>(model.queryParams[key]);
     }
-    // fall back to the router's state, no caching for serialization/deserialization
+    // fall back to the router's state
     return tryParse<T>(GoRouter.of(this).state.uri.queryParameters[key]);
   }
 
+  /// Reads typed path params and rebuilds only when this specific
+  /// path parameter changes.
+  ///
+  /// Example:
+  /// ```dart
+  /// final name = context.watchPathParamFromKey('name');
+  /// ```
+  /// Returns `null` if no path param is found or if the function
+  /// fails to parse the value from String to [T].
+  ///
+  /// Currently, only the following types are supported:
+  /// String, int, double, bool, DateTime.
   T? watchPathParamFromKey<T>(String key) {
     final model = InheritedModel.inheritFrom<UrlParamsModel>(
       this,
@@ -74,7 +98,7 @@ extension UrlParamsExtension on BuildContext {
     if (model != null) {
       return tryParse<T>(model.pathParams[key]);
     }
-    // fall back to the router's state, no caching for serialization/deserialization
+    // fall back to the router's state
     return tryParse<T>(GoRouter.of(this).state.pathParameters[key]);
   }
 

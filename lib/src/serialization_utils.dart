@@ -38,5 +38,9 @@ T? tryParse<T>(String? value) {
   if (T == bool || T.toString() == 'bool?') {
     return bool.tryParse(value) as T;
   }
+  if (T == DateTime || T.toString() == 'DateTime?') {
+    return DateTime.tryParse(value) as T;
+  }
+
   return null;
 }
