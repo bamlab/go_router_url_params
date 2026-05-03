@@ -212,7 +212,7 @@ void main() {
     });
   });
 
-  group('watchUrlParams - rebuild semantics', () {
+  group('watchUrlParams - rebuild consumers', () {
     testWidgets('rebuilds when its slice changes', (tester) async {
       final router = await pumpApp(
         tester,
@@ -334,10 +334,18 @@ void main() {
       // Reset after the initial mount has settled to isolate the cost
       // of a single URL change.
       personParseCount = 0;
+      final initial0 = ProbeState.builds['p1']!;
+      final initial1 = ProbeState.builds['p1']!;
+      final initial2 = ProbeState.builds['p1']!;
+      final initial3 = ProbeState.builds['p1']!;
 
       router.go('/?name=Bob&age=30');
       await tester.pumpAndSettle();
       // Four consumers but only one parse for the new model.
+      expect(ProbeState.builds['p0'], initial0 + 1);
+      expect(ProbeState.builds['p1'], initial1 + 1);
+      expect(ProbeState.builds['p2'], initial2 + 1);
+      expect(ProbeState.builds['p3'], initial3 + 1);
       expect(personParseCount, 1);
     });
 
@@ -350,7 +358,7 @@ void main() {
           initialLocation: '/?name=Alice&age=30',
           child: Column(
             children: List.generate(
-              5,
+              4,
               (i) => Probe(
                 id: 'p$i',
                 builder: (c) {
@@ -365,12 +373,20 @@ void main() {
         expect(personToJsonCount, 1);
 
         personToJsonCount = 0;
+        final initial0 = ProbeState.builds['p0']!;
+        final initial1 = ProbeState.builds['p1']!;
+        final initial2 = ProbeState.builds['p2']!;
+        final initial3 = ProbeState.builds['p3']!;
 
-        // URL change → dispatch fires for each of the 5 dependents.
+        // URL change → dispatch fires for each of the 4 dependents.
         // The new model parses once and runs toJson once; the old model
         // hits the cache populated last frame (no toJson).
-        router.go('/?name=Bob&age=30');
+        router.go('/?name=Bob&age=31');
         await tester.pumpAndSettle();
+        expect(ProbeState.builds['p0'], initial0 + 1);
+        expect(ProbeState.builds['p1'], initial1 + 1);
+        expect(ProbeState.builds['p2'], initial2 + 1);
+        expect(ProbeState.builds['p3'], initial3 + 1);
         expect(personToJsonCount, 1);
       },
     );
@@ -515,25 +531,30 @@ void main() {
     testWidgets('updates the URL via toJson and triggers consumer rebuild', (
       tester,
     ) async {
-      late BuildContext capturedContext;
       Person? observed;
       final router = await pumpApp(
         tester,
         builders: [UrlParamBuilder<Person>(Person.fromJson)],
         initialLocation: '/?name=Alice&age=30',
-        child: Builder(
+        child: Probe(
+          id: 'probe',
           builder: (context) {
-            capturedContext = context;
             observed = context.watchUrlParams<Person>();
-            return const SizedBox.shrink();
+            return MaterialButton(
+              onPressed: () {
+                context.setUrlParams(Person(name: 'Bob', age: 5));
+              },
+              child: Text('Set URL Params'),
+            );
           },
         ),
       );
+      final initial = ProbeState.builds['probe']!;
       expect(observed?.name, 'Alice');
-
-      capturedContext.setUrlParams(Person(name: 'Bob', age: 5));
+      await tester.tap(find.text('Set URL Params'));
       await tester.pumpAndSettle();
 
+      expect(ProbeState.builds['probe'], initial + 1);
       expect(observed?.name, 'Bob');
       expect(observed?.age, 5);
       expect(router.state.uri.queryParameters['name'], 'Bob');

@@ -9,7 +9,6 @@ abstract class UrlParamsData {
     final value = json[key];
     if (value == null) return null;
 
-    //TODO(louis): add an example for double
     //TODO(louis): support enums
     return int.tryParse(value) ??
         double.tryParse(value) ??
