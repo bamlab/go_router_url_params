@@ -17,6 +17,8 @@ abstract class Person extends UrlParamsData with _$Person {
   }) = _Person;
 
   factory Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
+  @override
+  Map<String, dynamic> toMap() => toJson();
 }
 
 @freezed
@@ -29,4 +31,6 @@ abstract class PersonStatus extends UrlParamsData with _$PersonStatus {
 
   factory PersonStatus.fromJson(Map<String, dynamic> json) =>
       _$PersonStatusFromJson(json);
+  @override
+  Map<String, dynamic> toMap() => toJson();
 }

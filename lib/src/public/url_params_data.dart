@@ -3,7 +3,7 @@ typedef UrlParamsDataBuilder<T extends UrlParamsData> =
 
 abstract class UrlParamsData {
   const UrlParamsData();
-  Map<String, dynamic> toJson();
+  Map<String, dynamic> toMap();
 
   static Object? tryParse(Map<dynamic, dynamic> json, String key) {
     final value = json[key];
@@ -23,4 +23,4 @@ Map<String, dynamic>? readObjectFromString(
 ) => json as Map<String, dynamic>;
 
 Map<String, dynamic> writeObjectToJson<T extends UrlParamsData?>(T status) =>
-    status?.toJson() ?? {};
+    status?.toMap() ?? {};

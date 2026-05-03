@@ -88,7 +88,7 @@ class UrlParamsModel extends InheritedModel<Object> {
       }
     }
     parseCache[type] = result;
-    flatCache[type] = result == null ? null : flattenParams(result.toJson());
+    flatCache[type] = result == null ? null : flattenParams(result.toMap());
     return result;
   }
 

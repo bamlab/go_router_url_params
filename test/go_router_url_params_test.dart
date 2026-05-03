@@ -26,7 +26,7 @@ class Person extends UrlParamsData {
   final int age;
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     personToJsonCount++;
     return {'name': name, 'age': age};
   }
@@ -46,7 +46,7 @@ class PersonStatus extends UrlParamsData {
   final String label;
 
   @override
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     personStatusToJsonCount++;
     return {'isActive': isActive, 'label': label};
   }
@@ -62,7 +62,7 @@ class PersonStatus extends UrlParamsData {
 
 class Throws extends UrlParamsData {
   @override
-  Map<String, dynamic> toJson() => const {};
+  Map<String, dynamic> toMap() => const {};
 
   static Throws? fromJson(Map<String, String> p) {
     throw StateError('boom');

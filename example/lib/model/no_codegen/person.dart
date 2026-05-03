@@ -8,19 +8,19 @@ class Person extends UrlParamsData {
   final int age;
   final PersonStatus? status;
 
-  factory Person.fromJson(Map<String, dynamic> json) => Person(
+  factory Person.fromMap(Map<String, dynamic> json) => Person(
     name: json['name'],
     age: int.tryParse(json['age']) ?? 0,
     status: json['status'] != null
-        ? PersonStatus.fromJson(json['status'] as Map<String, dynamic>)
+        ? PersonStatus.fromMap(json['status'] as Map<String, dynamic>)
         : null,
   );
 
   @override
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toMap() => {
     'name': name,
     'age': age,
-    'status': status?.toJson(),
+    'status': status?.toMap(),
   };
 }
 
@@ -29,11 +29,11 @@ class PersonStatus extends UrlParamsData {
   final bool isActive;
   final String? label;
 
-  factory PersonStatus.fromJson(Map<String, dynamic> json) => PersonStatus(
+  factory PersonStatus.fromMap(Map<String, dynamic> json) => PersonStatus(
     isActive: bool.tryParse(json['isActive']) ?? true,
     label: json['label'] as String?,
   );
 
   @override
-  Map<String, dynamic> toJson() => {'isActive': isActive, 'label': label};
+  Map<String, dynamic> toMap() => {'isActive': isActive, 'label': label};
 }

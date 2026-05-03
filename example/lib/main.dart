@@ -21,8 +21,8 @@ class MyApp extends StatelessWidget {
       builder: (context, child) => UrlParamsScope(
         router: router,
         builders: [
-          UrlParamBuilder<Person>(Person.fromJson),
-          UrlParamBuilder<PersonStatus>(PersonStatus.fromJson),
+          UrlParamBuilder<Person>(Person.fromMap),
+          UrlParamBuilder<PersonStatus>(PersonStatus.fromMap),
         ],
         child: child!,
       ),

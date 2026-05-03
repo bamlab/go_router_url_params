@@ -14,9 +14,10 @@ class Person extends UrlParamsData {
   final PersonStatus? status;
 
   factory Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
+  factory Person.fromMap(Map<String, dynamic> json) => Person.fromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$PersonToJson(this);
+  Map<String, dynamic> toMap() => _$PersonToJson(this);
 }
 
 @JsonSerializable()
@@ -28,7 +29,9 @@ class PersonStatus extends UrlParamsData {
 
   factory PersonStatus.fromJson(Map<String, dynamic> json) =>
       _$PersonStatusFromJson(json);
+  factory PersonStatus.fromMap(Map<String, dynamic> json) =>
+      PersonStatus.fromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$PersonStatusToJson(this);
+  Map<String, dynamic> toMap() => _$PersonStatusToJson(this);
 }
