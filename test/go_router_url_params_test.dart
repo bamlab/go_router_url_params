@@ -19,7 +19,7 @@ void resetCounters() {
   personStatusToJsonCount = 0;
 }
 
-class Person extends UrlParamsData {
+class Person with UrlParamsData {
   Person({required this.name, this.age = 0});
 
   final String name;
@@ -39,7 +39,7 @@ class Person extends UrlParamsData {
   }
 }
 
-class PersonStatus extends UrlParamsData {
+class PersonStatus with UrlParamsData {
   PersonStatus({this.isActive = true, this.label = 'Active'});
 
   final bool isActive;
@@ -60,7 +60,7 @@ class PersonStatus extends UrlParamsData {
   }
 }
 
-class Throws extends UrlParamsData {
+class Throws with UrlParamsData {
   @override
   Map<String, dynamic> toMap() => const {};
 

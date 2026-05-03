@@ -7,12 +7,15 @@ part 'person.g.dart';
 enum PersonKeys { age, name, person, isActive, label }
 
 @freezed
-abstract class Person extends UrlParamsData with _$Person {
+abstract class Person with _$Person, UrlParamsData {
   const Person._() : super();
   const factory Person({
     required String name,
     @JsonKey(readValue: UrlParamsData.tryParse) @Default(0) int age,
-    @JsonKey(readValue: readObjectFromString, toJson: writeObjectToJson)
+    @JsonKey(
+      readValue: UrlParamsData.readObjectFromString,
+      toJson: UrlParamsData.writeObjectToJson,
+    )
     PersonStatus? status,
   }) = _Person;
 
@@ -22,7 +25,7 @@ abstract class Person extends UrlParamsData with _$Person {
 }
 
 @freezed
-abstract class PersonStatus extends UrlParamsData with _$PersonStatus {
+abstract class PersonStatus with _$PersonStatus, UrlParamsData {
   const PersonStatus._() : super();
   const factory PersonStatus({
     @JsonKey(readValue: UrlParamsData.tryParse) @Default(true) bool isActive,

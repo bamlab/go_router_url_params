@@ -6,7 +6,7 @@ part 'person.g.dart';
 enum PersonKeys { age, name, person, isActive, label }
 
 @JsonSerializable()
-class Person extends UrlParamsData {
+class Person with UrlParamsData {
   const Person({this.name, this.age = 0, this.status});
   final String? name;
   @JsonKey(readValue: UrlParamsData.tryParse)
@@ -21,7 +21,7 @@ class Person extends UrlParamsData {
 }
 
 @JsonSerializable()
-class PersonStatus extends UrlParamsData {
+class PersonStatus with UrlParamsData {
   const PersonStatus({this.isActive = true, this.label});
   @JsonKey(readValue: UrlParamsData.tryParse)
   final bool isActive;

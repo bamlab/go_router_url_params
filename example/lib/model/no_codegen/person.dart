@@ -2,7 +2,7 @@ import 'package:go_router_url_params/go_router_url_params.dart';
 
 enum PersonKeys { age, name, person, isActive, label }
 
-class Person extends UrlParamsData {
+class Person with UrlParamsData {
   const Person({this.name, this.age = 0, this.status});
   final String? name;
   final int age;
@@ -24,7 +24,7 @@ class Person extends UrlParamsData {
   };
 }
 
-class PersonStatus extends UrlParamsData {
+class PersonStatus with UrlParamsData {
   const PersonStatus({this.isActive = true, this.label});
   final bool isActive;
   final String? label;

@@ -6,7 +6,7 @@ part 'person.mapper.dart';
 enum PersonKeys { age, name, person, isActive, label }
 
 @MappableClass()
-class Person extends UrlParamsData with PersonMappable {
+class Person with PersonMappable, UrlParamsData {
   const Person({this.name, this.age = 0, this.status});
   final String? name;
   final int age;
@@ -14,7 +14,7 @@ class Person extends UrlParamsData with PersonMappable {
 }
 
 @MappableClass()
-class PersonStatus extends UrlParamsData with PersonStatusMappable {
+class PersonStatus with PersonStatusMappable, UrlParamsData {
   const PersonStatus({this.isActive = true, this.label});
   final bool isActive;
   final String? label;
