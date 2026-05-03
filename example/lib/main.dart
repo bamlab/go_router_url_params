@@ -1,4 +1,4 @@
-import 'package:example/model/person.dart';
+import 'package:example/model/json_serializable/person.dart';
 import 'package:example/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router_url_params/go_router_url_params.dart';

@@ -1,4 +1,4 @@
-import 'package:example/model/person.dart';
+import 'package:example/model/json_serializable/person.dart';
 import 'package:example/pages/counter_page.dart';
 import 'package:example/router/paths.dart';
 import 'package:go_router/go_router.dart';

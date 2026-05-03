@@ -1,4 +1,4 @@
-import 'package:example/model/person.dart';
+import 'package:example/model/json_serializable/person.dart';
 import 'package:equatable/equatable.dart';
 
 class Path with EquatableMixin {
