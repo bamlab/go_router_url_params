@@ -1,4 +1,4 @@
-import 'package:example/model/json_serializable/person.dart';
+import 'package:example/model/dart_mappable/person.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:go_router_url_params/go_router_url_params.dart';
@@ -38,13 +38,7 @@ class CounterPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.setUrlParams(
-            Person(
-              age: person.age + 1,
-              name: person.name,
-              status: person.status,
-            ),
-          );
+          context.setUrlParams(person.copyWith(age: person.age + 1));
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

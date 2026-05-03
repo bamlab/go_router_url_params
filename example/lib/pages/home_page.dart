@@ -1,4 +1,4 @@
-import 'package:example/model/json_serializable/person.dart';
+import 'package:example/model/dart_mappable/person.dart';
 import 'package:example/router/paths.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -71,9 +71,7 @@ class StatusSwitch extends StatelessWidget {
     return Switch(
       value: status.isActive,
       onChanged: (value) {
-        context.setUrlParams(
-          PersonStatus(isActive: value, label: status.label),
-        );
+        context.setUrlParams(status.copyWith(isActive: value));
       },
     );
   }
