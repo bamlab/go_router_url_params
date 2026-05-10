@@ -73,7 +73,7 @@ extension UrlParamsExtension on BuildContext {
   /// fails to parse the value from String to [T].
   ///
   /// Currently, only the following types are supported:
-  /// String, int, double, bool, DateTime.
+  /// String, int, double, bool, DateTime, or List of these types.
   T? watchQueryParamFromKey<T>(String key) {
     final model = InheritedModel.inheritFrom<UrlParamsModel>(
       this,
@@ -97,7 +97,7 @@ extension UrlParamsExtension on BuildContext {
   /// fails to parse the value from String to [T].
   ///
   /// Currently, only the following types are supported:
-  /// String, int, double, bool, DateTime.
+  /// String, int, double, bool, DateTime, or List of these types.
   T? watchPathParamFromKey<T>(String key) {
     final model = InheritedModel.inheritFrom<UrlParamsModel>(
       this,

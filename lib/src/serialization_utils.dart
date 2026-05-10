@@ -141,7 +141,7 @@ Iterable<MapEntry<String, List<String>>> flattenedQueryParamsToListOfStrings(
 /// ```
 ///
 /// Currently, only the following types are supported:
-/// String, int, double, bool, DateTime.
+/// String, int, double, bool, DateTime, or List of these types.
 T? tryParse<T>(String? value) {
   if (value == null) {
     return null;
@@ -160,6 +160,21 @@ T? tryParse<T>(String? value) {
   }
   if (T == DateTime || T.toString() == 'DateTime?') {
     return DateTime.tryParse(value) as T;
+  }
+  if (T == (List<String>) || T.toString() == 'List<String>?') {
+    return value.toString().split(',') as T;
+  }
+  if (T == (List<int>) || T.toString() == 'List<int>?') {
+    return value.toString().split(',').map(int.tryParse).toList() as T;
+  }
+  if (T == (List<double>) || T.toString() == 'List<double>?') {
+    return value.toString().split(',').map(double.tryParse).toList() as T;
+  }
+  if (T == (List<bool>) || T.toString() == 'List<bool>?') {
+    return value.toString().split(',').map(bool.tryParse).toList() as T;
+  }
+  if (T == (List<DateTime>) || T.toString() == 'List<DateTime>?') {
+    return value.toString().split(',').map(DateTime.tryParse).toList() as T;
   }
 
   return null;
