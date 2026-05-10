@@ -123,7 +123,7 @@ class _UrlParamsScopeState extends State<UrlParamsScope> {
       queryParams: queryParams,
       builders: {for (final e in widget.builders) e.type: e.builder},
       parseCache: <Type, UrlParamsData?>{},
-      flatCache: <Type, Map<String, String>?>{},
+      flatCache: <Type, Map<String, dynamic>?>{},
       child: widget.child,
     );
   }

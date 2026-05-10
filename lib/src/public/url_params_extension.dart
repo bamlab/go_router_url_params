@@ -6,25 +6,17 @@ import 'package:go_router_url_params/src/url_params_model.dart';
 
 extension UrlParamsExtension on BuildContext {
   void setUrlParamsFromMap({
-    Map<String, dynamic> queryParams = const {},
-    Map<String, dynamic> pathParams = const {},
+    Map<String, List<String>> queryParams = const {},
+    Map<String, String> pathParams = const {},
   }) {
     final router = GoRouter.of(this);
     // Intentionally non-subscribing: callers mutate the URL from callbacks
     // and must not rebuild on every URL change as a side effect.
     final newQueryParameters = {
-      ...router.state.uri.queryParameters,
-      ...Map.fromEntries(
-        queryParams.entries
-            .map((entry) => MapEntry(entry.key, entry.value?.toString()))
-            .where((entry) => entry.value != null)
-            .toList(),
-      ),
+      ...router.state.uri.queryParametersAll,
+      ...queryParams,
     };
-    final newPathParameters = {
-      ...router.state.pathParameters,
-      ...pathParams.map((key, value) => MapEntry(key, value.toString())),
-    };
+    final newPathParameters = {...router.state.pathParameters, ...pathParams};
     GoRouter.of(this).go(
       router.state.uri
           .replace(
@@ -35,19 +27,35 @@ extension UrlParamsExtension on BuildContext {
     );
   }
 
+  /// Warning: Don't name any path parameter with the same key than a query parameter.
+  /// If some path param has the same name than a query param, we can't
+  /// guess which one goes where. One of the params value will be used for the
+  /// path param, and the query param will always be empty.
+  ///
+  /// If you really need to do that, you can still use the lower level
+  /// [setUrlParamsFromMap] in combinaison with [watchQueryParamFromKey] and [watchPathParamFromKey]
+  ///
+  /// ---
+  ///
+  /// Sets the [params] object in the url, rebuilding the UI wherever needed,
+  /// which means wherever [watchUrlParams] is used.
   void setUrlParams(UrlParamsData params) {
     final flattenedParams = flattenParams(params.toMap());
 
     final pathParamsKeys = GoRouter.of(this).state.pathParameters.keys;
     final pathParams = Map.fromEntries(
-      flattenedParams.entries.where(
-        (entry) => pathParamsKeys.contains(entry.key),
-      ),
+      flattenedParams.entries
+          .where((entry) => pathParamsKeys.contains(entry.key))
+          .map((entry) {
+            return MapEntry(entry.key, entry.value.toString());
+          }),
     );
     final queryParams = Map.fromEntries(
-      flattenedParams.entries.where(
-        // query params must not have the same keys as path params
-        (entry) => !pathParamsKeys.contains(entry.key),
+      flattenedQueryParamsToListOfStrings(
+        flattenedParams.entries.where(
+          // query params must not have the same keys as path params
+          (entry) => !pathParamsKeys.contains(entry.key),
+        ),
       ),
     );
 

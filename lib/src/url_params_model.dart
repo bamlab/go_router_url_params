@@ -61,20 +61,11 @@ class UrlParamsModel extends InheritedModel<Object> {
   /// Flattened `toJson()` for each parsed type, populated alongside
   /// [parseCache]. Used by [updateShouldNotifyDependent] to detect changes
   /// without calling `toJson()` per dependent.
-  final Map<Type, Map<String, String>?> flatCache;
+  final Map<Type, Map<String, dynamic>?> flatCache;
 
-  T? parse<T extends UrlParamsData>() => _parseForType(T) as T?;
+  T? parse<T extends UrlParamsData>() => _cachedParseForType(T) as T?;
 
-  /// Returns the flattened `toJson()` representation of the parsed value
-  /// for [type], computing and caching it (and the parsed instance) on
-  /// first access. Returns `null` if no builder is registered for [type]
-  /// or if the builder threw.
-  Map<String, String>? _flatFor(Type type) {
-    _parseForType(type);
-    return flatCache[type];
-  }
-
-  UrlParamsData? _parseForType(Type type) {
+  UrlParamsData? _cachedParseForType(Type type) {
     if (parseCache.containsKey(type)) {
       return parseCache[type];
     }
@@ -90,6 +81,15 @@ class UrlParamsModel extends InheritedModel<Object> {
     parseCache[type] = result;
     flatCache[type] = result == null ? null : flattenParams(result.toMap());
     return result;
+  }
+
+  /// Returns the flattened `toJson()` representation of the parsed value
+  /// for [type], computing and caching it (and the parsed instance) on
+  /// first access. Returns `null` if no builder is registered for [type]
+  /// or if the builder threw.
+  Map<String, dynamic>? _flatFor(Type type) {
+    _cachedParseForType(type);
+    return flatCache[type];
   }
 
   @override
