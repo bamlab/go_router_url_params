@@ -31,7 +31,7 @@ class Person with UrlParamsData {
     return {'name': name, 'age': age};
   }
 
-  static Person? fromJson(Map<String, String> p) {
+  static Person? fromMap(Map<String, dynamic> p) {
     personParseCount++;
     final name = p['name'];
     if (name == null) return null;
@@ -51,7 +51,7 @@ class PersonStatus with UrlParamsData {
     return {'isActive': isActive, 'label': label};
   }
 
-  static PersonStatus? fromJson(Map<String, String> p) {
+  static PersonStatus? fromMap(Map<String, dynamic> p) {
     personStatusParseCount++;
     return PersonStatus(
       isActive: bool.tryParse(p['isActive'] ?? '') ?? true,
@@ -64,7 +64,7 @@ class Throws with UrlParamsData {
   @override
   Map<String, dynamic> toMap() => const {};
 
-  static Throws? fromJson(Map<String, String> p) {
+  static Throws? fromMap(Map<String, dynamic> p) {
     throw StateError('boom');
   }
 }
@@ -145,7 +145,7 @@ void main() {
       Person? read;
       await pumpApp(
         tester,
-        builders: [UrlParamBuilder<Person>(Person.fromJson)],
+        builders: [UrlParamBuilder<Person>(Person.fromMap)],
         initialLocation: '/?name=Alice&age=30',
         child: Builder(
           builder: (context) {
@@ -163,8 +163,8 @@ void main() {
       Person? read;
       await pumpApp(
         tester,
-        builders: [UrlParamBuilder<Person>(Person.fromJson)],
-        // No `name` → Person.fromJson returns null.
+        builders: [UrlParamBuilder<Person>(Person.fromMap)],
+        // No `name` → Person.fromMap returns null.
         initialLocation: '/?age=30',
         child: Builder(
           builder: (context) {
@@ -182,7 +182,7 @@ void main() {
       Throws? read;
       await pumpApp(
         tester,
-        builders: [UrlParamBuilder<Throws>(Throws.fromJson)],
+        builders: [UrlParamBuilder<Throws>(Throws.fromMap)],
         child: Builder(
           builder: (context) {
             read = context.watchUrlParams<Throws>();
@@ -216,7 +216,7 @@ void main() {
     testWidgets('rebuilds when its slice changes', (tester) async {
       final router = await pumpApp(
         tester,
-        builders: [UrlParamBuilder<Person>(Person.fromJson)],
+        builders: [UrlParamBuilder<Person>(Person.fromMap)],
         initialLocation: '/?name=Alice&age=30',
         child: Probe(
           id: 'p',
@@ -243,7 +243,7 @@ void main() {
     ) async {
       final router = await pumpApp(
         tester,
-        builders: [UrlParamBuilder<Person>(Person.fromJson)],
+        builders: [UrlParamBuilder<Person>(Person.fromMap)],
         initialLocation: '/?name=Alice&age=30',
         child: Probe(
           id: 'p',
@@ -270,8 +270,8 @@ void main() {
       final router = await pumpApp(
         tester,
         builders: [
-          UrlParamBuilder<Person>(Person.fromJson),
-          UrlParamBuilder<PersonStatus>(PersonStatus.fromJson),
+          UrlParamBuilder<Person>(Person.fromMap),
+          UrlParamBuilder<PersonStatus>(PersonStatus.fromMap),
         ],
         initialLocation: '/?name=Alice&isActive=false',
         child: Column(
@@ -316,7 +316,7 @@ void main() {
     ) async {
       final router = await pumpApp(
         tester,
-        builders: [UrlParamBuilder<Person>(Person.fromJson)],
+        builders: [UrlParamBuilder<Person>(Person.fromMap)],
         initialLocation: '/?name=Alice&age=30',
         child: Column(
           children: List.generate(
@@ -354,7 +354,7 @@ void main() {
       (tester) async {
         final router = await pumpApp(
           tester,
-          builders: [UrlParamBuilder<Person>(Person.fromJson)],
+          builders: [UrlParamBuilder<Person>(Person.fromMap)],
           initialLocation: '/?name=Alice&age=30',
           child: Column(
             children: List.generate(
@@ -396,7 +396,7 @@ void main() {
       (tester) async {
         final router = await pumpApp(
           tester,
-          builders: [UrlParamBuilder<Person>(Person.fromJson)],
+          builders: [UrlParamBuilder<Person>(Person.fromMap)],
           initialLocation: '/?name=Alice&age=30',
           child: Probe(
             id: 'p',
@@ -534,7 +534,7 @@ void main() {
       Person? observed;
       final router = await pumpApp(
         tester,
-        builders: [UrlParamBuilder<Person>(Person.fromJson)],
+        builders: [UrlParamBuilder<Person>(Person.fromMap)],
         initialLocation: '/?name=Alice&age=30',
         child: Probe(
           id: 'probe',
@@ -570,7 +570,7 @@ void main() {
       Person? read;
       await pumpApp(
         tester,
-        builders: [UrlParamBuilder<Person>(Person.fromJson)],
+        builders: [UrlParamBuilder<Person>(Person.fromMap)],
         initialLocation: '/',
         child: Builder(
           builder: (context) {
@@ -579,7 +579,7 @@ void main() {
           },
         ),
       );
-      // No `name` in URL → Person.fromJson returns null.
+      // No `name` in URL → Person.fromMap returns null.
       expect(read, isNull);
     });
 
@@ -603,7 +603,7 @@ void main() {
       Person? observed;
       final router = await pumpApp(
         tester,
-        builders: [UrlParamBuilder<Person>(Person.fromJson)],
+        builders: [UrlParamBuilder<Person>(Person.fromMap)],
         initialLocation: '/?name=Alice&age=1',
         child: Builder(
           builder: (context) {
@@ -629,7 +629,7 @@ void main() {
       Person? observed;
       final router = await pumpApp(
         tester,
-        builders: [UrlParamBuilder<Person>((p) => Person.fromJson(p))],
+        builders: [UrlParamBuilder<Person>((p) => Person.fromMap(p))],
         initialLocation: '/?name=Alice&age=30',
         child: Column(
           children: List.generate(

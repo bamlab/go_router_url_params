@@ -1,5 +1,5 @@
 typedef UrlParamsDataBuilder<T extends UrlParamsData> =
-    T? Function(Map<String, String> params);
+    T? Function(Map<String, dynamic> params);
 
 mixin UrlParamsData {
   Map<String, dynamic> toMap();

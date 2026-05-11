@@ -121,6 +121,116 @@ Iterable<MapEntry<String, List<String>>> flattenedQueryParamsToListOfStrings(
   return grouped.entries;
 }
 
+/// Transforms a flatterned map (obtained from the pathParameters / queryParametersAll)
+/// of the router or from [flattenParams] and [flattenedQueryParamsToListOfStrings])
+/// to a map that can be used to construct an object with its typical fromMap/fromJson method.
+///
+/// Inverse function of the product of [flattenParams] and [flattenedQueryParamsToListOfStrings].
+///
+/// Example:
+/// ```dart
+/// {
+///   "name": "Rico",
+///   "age": 25,
+///   "status.isActive": true,
+///   "status.jobs": ["developper", "super-hero"],
+///   "status.labels[0].label": "label1",
+///   "status.labels[1].label": "label2"
+/// }
+/// ```
+///
+/// becomes :
+///
+/// ```dart
+/// {
+///   "name": "Rico",
+///   "age": 25,
+///   "status": {
+///     "isActive": true,
+///     "jobs":[
+///       "developper",
+///       "super-hero"
+///     ],
+///     "labels": [
+///       {"label":"label1"},
+///       {"label":"label2"}
+///     ],
+///     "weaknesses": null
+///   }
+/// }
+/// ```
+///
+Map<String, dynamic> unFlattenParams(Map<String, dynamic> flattenedMap) {
+  final result = <String, dynamic>{};
+  for (final entry in flattenedMap.entries) {
+    final tokens = _parseKeyPath(entry.key);
+    if (tokens.isEmpty) continue;
+    _assignAtPath(result, tokens, entry.value);
+  }
+  return result;
+}
+
+/// A token in a flattened key path: either a [String] (map key) or an
+/// [int] (list index).
+List<Object> _parseKeyPath(String key) {
+  final tokens = <Object>[];
+  final indexRegex = RegExp(r'\[(\d+)\]');
+  for (final segment in key.split('.')) {
+    if (segment.isEmpty) continue;
+    final firstBracket = segment.indexOf('[');
+    final name = firstBracket == -1
+        ? segment
+        : segment.substring(0, firstBracket);
+    if (name.isNotEmpty) tokens.add(name);
+    if (firstBracket == -1) continue;
+    for (final match in indexRegex.allMatches(segment, firstBracket)) {
+      final index = tryParse<int>(match.group(1));
+      if (index != null) tokens.add(index);
+    }
+  }
+  return tokens;
+}
+
+void _assignAtPath(Map<String, dynamic> root, List<Object> path, dynamic value) {
+  dynamic container = root;
+  for (var i = 0; i < path.length; i++) {
+    final token = path[i];
+    final isLast = i == path.length - 1;
+    final nextIsIndex = !isLast && path[i + 1] is int;
+    if (token is String) {
+      final map = container as Map<String, dynamic>;
+      if (isLast) {
+        map[token] = value;
+      } else {
+        final existing = map[token];
+        if (existing == null) {
+          container = nextIsIndex ? <dynamic>[] : <String, dynamic>{};
+          map[token] = container;
+        } else {
+          container = existing;
+        }
+      }
+    } else if (token is int) {
+      final list = container as List;
+      while (list.length <= token) {
+        list.add(null);
+      }
+      if (isLast) {
+        list[token] = value;
+      } else {
+        final existing = list[token];
+        if (existing == null) {
+          final created = nextIsIndex ? <dynamic>[] : <String, dynamic>{};
+          list[token] = created;
+          container = created;
+        } else {
+          container = existing;
+        }
+      }
+    }
+  }
+}
+
 /// Function used to parse a string to a typed value.
 /// Used to transform a map like this:
 /// ```dart

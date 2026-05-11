@@ -41,7 +41,10 @@ class CounterPage extends StatelessWidget {
           context.setUrlParams(
             person.copyWith(
               status: person.status.copyWith(
-                labels: [...person.status.labels, "hello"],
+                labels: [
+                  ...person.status.labels,
+                  "hello${person.status.labels.length}",
+                ],
               ),
             ),
           );

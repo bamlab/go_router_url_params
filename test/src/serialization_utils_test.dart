@@ -46,4 +46,43 @@ void main() {
       ]),
     );
   });
+
+  test('unflatten params', () async {
+    final flattenedMap = {
+      "name": "Rico",
+      "age": 25,
+      "status.isActive": true,
+      "status.jobs[0]": "developper",
+      "status.jobs[1]": "super-hero",
+      "status.labels[0].label": "label1",
+      "status.labels[1].label": "label2",
+    };
+    final unflattenedMap = unFlattenParams(flattenedMap);
+    expect(unflattenedMap, {
+      "name": "Rico",
+      "age": 25,
+      "status": {
+        "isActive": true,
+        "jobs": ["developper", "super-hero"],
+        "labels": [
+          {"label": "label1"},
+          {"label": "label2"},
+        ],
+      },
+    });
+  });
+
+  test('flatten and unflatten params should be inverses', () async {
+    final nestedMap = {
+      "name": "Rico",
+      "age": 25,
+      "status": {
+        "isActive": true,
+        "jobs": ["developper", "super-hero"],
+      },
+    };
+    final flattenedMap = flattenParams(nestedMap);
+    final unflattenedMap = unFlattenParams(flattenedMap);
+    expect(unflattenedMap, nestedMap);
+  });
 }

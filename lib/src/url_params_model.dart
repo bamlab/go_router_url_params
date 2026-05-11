@@ -73,7 +73,7 @@ class UrlParamsModel extends InheritedModel<Object> {
     UrlParamsData? result;
     if (builder != null) {
       try {
-        result = builder({...queryParams, ...pathParams});
+        result = builder(unFlattenParams({...queryParams, ...pathParams}));
       } catch (_) {
         result = null;
       }
