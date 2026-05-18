@@ -18,11 +18,11 @@ Path counter(Person person) => Path(
   '/counter/${person.name}'
       '?${PersonKeys.age.name}=${person.age}'
       '&${PersonKeys.isActive.name}=${person.status.isActive}'
-      '&${person.status.labels.toQueryString(PersonKeys.labels.name)}',
+      '${person.status.labels.toQueryString(PersonKeys.labels.name)}',
   'counter',
 );
 
 extension on List<String> {
   String toQueryString(String key) =>
-      map((value) => '$key=$value').toList().join('&');
+      isEmpty ? '' : '&${map((value) => '$key=$value').toList().join('&')}';
 }
