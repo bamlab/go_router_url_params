@@ -66,6 +66,10 @@ class StatusSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // This widget will only rebuild when a parameter of type PersonStatus changes
+    // (isActive or labels, for example).
+    // It will not rebuild when an other parameter of type Person changes
+    // (the name or the age, for example).
     final status = context.watchUrlParams<PersonStatus>();
     if (status == null) return const SizedBox.shrink();
 
