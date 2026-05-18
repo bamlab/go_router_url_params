@@ -13,16 +13,8 @@ class Path with EquatableMixin {
 }
 
 Path get home => Path('/', '/', 'home');
-Path counter(Person person) => Path(
+Path counter(Person person, {Uri? currentUri}) => Path(
   '/counter/${person.name}',
-  '/counter/${person.name}'
-      '?${PersonKeys.age.name}=${person.age}'
-      '&${PersonKeys.isActive.name}=${person.status.isActive}'
-      '${person.status.labels.toQueryString(PersonKeys.labels.name)}',
+  '/counter/${person.name}${person.toQueryParamsString(keysToIgnore: ["name"], currentUri: currentUri)}',
   'counter',
 );
-
-extension on List<String> {
-  String toQueryString(String key) =>
-      isEmpty ? '' : '&${map((value) => '$key=$value').toList().join('&')}';
-}

@@ -48,6 +48,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () => context.go(
                   counter(
                     Person(name: nameController.text, status: status),
+                    currentUri: GoRouter.of(context).state.uri,
                   ).location,
                 ),
                 child: const Text('Go to Counter'),
