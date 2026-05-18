@@ -95,7 +95,8 @@ extension _MaybePrefixMap on Map<String, dynamic> {
 ///   "example": "good",
 ///   "bar[0]": 1,
 ///   "bar[1]": 26,
-///   "foo[0].example2": "true"
+///   "foo[0].example2": "true",
+///   "foo[0].example3[0]": "42"
 /// }
 /// ```
 ///
@@ -107,11 +108,12 @@ extension _MaybePrefixMap on Map<String, dynamic> {
 ///   "example": ["good"],
 ///   "bar": ["1","26"],
 ///   "foo[0].example2": ["true"]
+///   "foo[0].example3[0]": ["42"]
 /// }
 Iterable<MapEntry<String, List<String>>> flattenedQueryParamsToListOfStrings(
   Iterable<MapEntry<String, dynamic>> entries,
 ) {
-  final trailingIndexRegex = RegExp(r'\[\d+\]$');
+  final trailingIndexRegex = RegExp(r'(?<!\..*)\[\d+\]$');
   final grouped = <String, List<String>>{};
   for (final entry in entries) {
     if (entry.value == null) continue;
@@ -155,7 +157,6 @@ Iterable<MapEntry<String, List<String>>> flattenedQueryParamsToListOfStrings(
 ///       {"label":"label1"},
 ///       {"label":"label2"}
 ///     ],
-///     "weaknesses": null
 ///   }
 /// }
 /// ```
@@ -191,7 +192,11 @@ List<Object> _parseKeyPath(String key) {
   return tokens;
 }
 
-void _assignAtPath(Map<String, dynamic> root, List<Object> path, dynamic value) {
+void _assignAtPath(
+  Map<String, dynamic> root,
+  List<Object> path,
+  dynamic value,
+) {
   dynamic container = root;
   for (var i = 0; i < path.length; i++) {
     final token = path[i];

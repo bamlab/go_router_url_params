@@ -35,6 +35,7 @@ void main() {
       MapEntry('bar[0]', 1),
       MapEntry('bar[1]', 26),
       MapEntry('foo[0].example2', 'true'),
+      MapEntry('foo[0].example3[0]', '42'),
     ];
     final result = flattenedQueryParamsToListOfStrings(entries);
     expect(
@@ -43,6 +44,7 @@ void main() {
         MapEntry('example', ['good']),
         MapEntry('bar', ['1', '26']),
         MapEntry('foo[0].example2', ['true']),
+        MapEntry('foo[0].example3[0]', ['42']),
       ]),
     );
   });
