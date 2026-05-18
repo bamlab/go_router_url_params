@@ -192,24 +192,6 @@ void main() {
       );
       expect(read, isNull);
     });
-
-    testWidgets('returns null when scope has no builder registered for T', (
-      tester,
-    ) async {
-      Person? read;
-      await pumpApp(
-        tester,
-        // No builders registered.
-        initialLocation: '/?name=Alice',
-        child: Builder(
-          builder: (context) {
-            read = context.watchUrlParams<Person>();
-            return const SizedBox.shrink();
-          },
-        ),
-      );
-      expect(read, isNull);
-    });
   });
 
   group('watchUrlParams - rebuild consumers', () {

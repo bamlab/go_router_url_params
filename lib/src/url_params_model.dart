@@ -69,7 +69,12 @@ class UrlParamsModel extends InheritedModel<Object> {
     if (parseCache.containsKey(type)) {
       return parseCache[type];
     }
-    final builder = builders[type];
+    assert(
+      builders.containsKey(type),
+      'No builder registered for type $type. '
+      'Use UrlParamsScope.builders to register a builder for this type.',
+    );
+    final builder = builders[type]!;
     UrlParamsData? result;
     if (builder != null) {
       try {
