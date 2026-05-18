@@ -161,79 +161,60 @@ Iterable<MapEntry<String, List<String>>> flattenedQueryParamsToListOfStrings(
 /// }
 /// ```
 ///
-Map<String, dynamic> unFlattenParams(Map<String, dynamic> flattenedMap) {
-  final result = <String, dynamic>{};
-  for (final entry in flattenedMap.entries) {
-    final tokens = _parseKeyPath(entry.key);
-    if (tokens.isEmpty) continue;
-    _assignAtPath(result, tokens, entry.value);
-  }
-  return result;
+Map<String, dynamic> unFlattenParams(Map<String, dynamic> flattenedMap) =>
+    flattenedMap.entries.fold<Map<String, dynamic>>(<String, dynamic>{}, (
+      acc,
+      entry,
+    ) {
+      final tokens = _parseKeyPath(entry.key);
+      if (tokens.isEmpty) return acc;
+      return _setAtPath(acc, tokens, entry.value) as Map<String, dynamic>;
+    });
+
+final _indexRegex = RegExp(r'\[(\d+)\]');
+
+/// Parses a flattened key (e.g. `status.labels[0].label`) into an ordered list
+/// of access tokens: a [String] for a map key, an [int] for a list index.
+List<Object> _parseKeyPath(String key) => [
+  for (final segment in key.split('.'))
+    if (segment.isNotEmpty) ..._tokensInSegment(segment),
+];
+
+/// Extracts the optional name and any `[index]` parts from a single
+/// dot-separated segment (e.g. `labels[0]` -> `['labels', 0]`).
+List<Object> _tokensInSegment(String segment) {
+  final firstBracket = segment.indexOf('[');
+  if (firstBracket == -1) return [segment];
+  final name = segment.substring(0, firstBracket);
+  final indices = _indexRegex
+      .allMatches(segment, firstBracket)
+      .map((match) => int.tryParse(match.group(1) ?? ""))
+      .whereType<int>();
+  return [if (name.isNotEmpty) name, ...indices];
 }
 
-/// A token in a flattened key path: either a [String] (map key) or an
-/// [int] (list index).
-List<Object> _parseKeyPath(String key) {
-  final tokens = <Object>[];
-  final indexRegex = RegExp(r'\[(\d+)\]');
-  for (final segment in key.split('.')) {
-    if (segment.isEmpty) continue;
-    final firstBracket = segment.indexOf('[');
-    final name = firstBracket == -1
-        ? segment
-        : segment.substring(0, firstBracket);
-    if (name.isNotEmpty) tokens.add(name);
-    if (firstBracket == -1) continue;
-    for (final match in indexRegex.allMatches(segment, firstBracket)) {
-      final index = tryParse<int>(match.group(1));
-      if (index != null) tokens.add(index);
-    }
+/// Returns a copy of [root] with [value] placed at [path]. Missing intermediate
+/// containers are created on the fly: maps for [String] tokens, lists padded
+/// with `null` up to the requested index for [int] tokens.
+dynamic _setAtPath(dynamic root, List<Object> path, dynamic value) {
+  if (path.isEmpty) return value;
+  final [token, ...rest] = path;
+  if (token is String) {
+    final map = (root as Map<String, dynamic>?) ?? const <String, dynamic>{};
+    return <String, dynamic>{
+      ...map,
+      token: _setAtPath(map[token], rest, value),
+    };
   }
-  return tokens;
-}
-
-void _assignAtPath(
-  Map<String, dynamic> root,
-  List<Object> path,
-  dynamic value,
-) {
-  dynamic container = root;
-  for (var i = 0; i < path.length; i++) {
-    final token = path[i];
-    final isLast = i == path.length - 1;
-    final nextIsIndex = !isLast && path[i + 1] is int;
-    if (token is String) {
-      final map = container as Map<String, dynamic>;
-      if (isLast) {
-        map[token] = value;
-      } else {
-        final existing = map[token];
-        if (existing == null) {
-          container = nextIsIndex ? <dynamic>[] : <String, dynamic>{};
-          map[token] = container;
-        } else {
-          container = existing;
-        }
-      }
-    } else if (token is int) {
-      final list = container as List;
-      while (list.length <= token) {
-        list.add(null);
-      }
-      if (isLast) {
-        list[token] = value;
-      } else {
-        final existing = list[token];
-        if (existing == null) {
-          final created = nextIsIndex ? <dynamic>[] : <String, dynamic>{};
-          list[token] = created;
-          container = created;
-        } else {
-          container = existing;
-        }
-      }
-    }
+  if (token is int) {
+    final list = (root as List?) ?? const <dynamic>[];
+    final length = token >= list.length ? token + 1 : list.length;
+    return List<dynamic>.generate(length, (i) {
+      final existing = i < list.length ? list[i] : null;
+      return i == token ? _setAtPath(existing, rest, value) : existing;
+    });
   }
+  throw StateError('Unsupported path token: ${token.runtimeType}');
 }
 
 /// Function used to parse a string to a typed value.
