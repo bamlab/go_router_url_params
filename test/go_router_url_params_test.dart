@@ -31,10 +31,9 @@ class Person with UrlParamsData {
     return {'name': name, 'age': age};
   }
 
-  static Person? fromMap(Map<String, dynamic> p) {
+  static Person fromMap(Map<String, dynamic> p) {
     personParseCount++;
     final name = p['name'];
-    if (name == null) return null;
     return Person(name: name, age: int.tryParse(p['age'] ?? '') ?? 0);
   }
 }
@@ -51,7 +50,7 @@ class PersonStatus with UrlParamsData {
     return {'isActive': isActive, 'label': label};
   }
 
-  static PersonStatus? fromMap(Map<String, dynamic> p) {
+  static PersonStatus fromMap(Map<String, dynamic> p) {
     personStatusParseCount++;
     return PersonStatus(
       isActive: bool.tryParse(p['isActive'] ?? '') ?? true,
@@ -64,7 +63,7 @@ class Throws with UrlParamsData {
   @override
   Map<String, dynamic> toMap() => const {};
 
-  static Throws? fromMap(Map<String, dynamic> p) {
+  static Throws fromMap(Map<String, dynamic> p) {
     throw StateError('boom');
   }
 }
