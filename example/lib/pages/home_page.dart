@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(32.0),
+          padding: .all(32.0),
           child: Column(
             mainAxisSize: .min,
             children: [
