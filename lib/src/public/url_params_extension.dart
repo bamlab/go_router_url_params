@@ -17,7 +17,7 @@ extension UrlParamsExtension on BuildContext {
       ...queryParams,
     };
     final newPathParameters = {...router.state.pathParameters, ...pathParams};
-    GoRouter.of(this).go(
+    router.go(
       router.state.uri
           .replace(
             path: formatPath(router.state.fullPath ?? '', newPathParameters),
@@ -28,9 +28,9 @@ extension UrlParamsExtension on BuildContext {
   }
 
   /// Warning: Don't name any path parameter with the same key than a query parameter.
-  /// If some path param has the same name than a query param, we can't
-  /// guess which one goes where. One of the params value will be used for the
-  /// path param, and the query param will always be empty.
+  /// If some path param has the same name than a query param, and the function recieves
+  /// a value for this name, it can't guess where to put it. In this case, the value
+  /// will be used for the path param, and the query param will always be empty.
   ///
   /// If you really need to do that, you can still use the lower level
   /// [setUrlParamsFromMap] in combinaison with [watchQueryParamFromKey] and [watchPathParamFromKey]
