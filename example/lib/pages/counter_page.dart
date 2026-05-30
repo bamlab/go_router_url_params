@@ -1,6 +1,5 @@
 import 'package:example/model/dart_mappable/person.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:go_router_url_params/go_router_url_params.dart';
 
 class CounterPage extends StatelessWidget {
@@ -18,7 +17,7 @@ class CounterPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: SelectableText(
-          GoRouter.of(context).state.uri.toString(),
+          context.uri.toString(),
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ),
@@ -56,7 +55,7 @@ class Nobody extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: SelectableText(
-          GoRouter.of(context).state.uri.toString(),
+          context.uri.toString(),
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ),

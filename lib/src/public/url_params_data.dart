@@ -31,11 +31,11 @@ mixin UrlParamsData {
   /// If you pass a [currentUri], only the missing query params will be added to the url.
   /// This is useful when you want to be able to navigate from page B back to page A,
   /// and then to page B again, while keeping the state of page B all along the way.
+  /// You can use the [BuildContext.uri] extension from this package.
   ///
   /// Example:
   /// ```dart
-  /// final currentUrl = GoRouter.of(context).state.uri;
-  /// context.go('/counter/${person.name}${person.toQueryParamsString(currentUrl: currentUrl)}'),
+  /// context.go('/counter/${person.name}${person.toQueryParamsString(currentUrl: context.uri)}'),
   /// ```
   String toQueryParamsString({
     List<String>? keysToIgnore,

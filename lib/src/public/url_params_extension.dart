@@ -83,7 +83,7 @@ extension UrlParamsExtension on BuildContext {
       return tryParse<T>(model.queryParams[key]);
     }
     // fall back to the router's state
-    return tryParse<T>(GoRouter.of(this).state.uri.queryParameters[key]);
+    return tryParse<T>(uri.queryParameters[key]);
   }
 
   /// Reads typed path params and rebuilds only when this specific
@@ -136,4 +136,6 @@ extension UrlParamsExtension on BuildContext {
     );
     return model?.parse<T>();
   }
+
+  Uri get uri => GoRouter.of(this).state.uri;
 }

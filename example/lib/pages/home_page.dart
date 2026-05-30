@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          GoRouter.of(context).state.uri.toString(),
+          context.uri.toString(),
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ),
@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () => context.go(
                   counter(
                     Person(name: nameController.text, status: status),
-                    currentUri: GoRouter.of(context).state.uri,
+                    currentUri: context.uri,
                   ).location,
                 ),
                 child: const Text('Go to Counter'),
