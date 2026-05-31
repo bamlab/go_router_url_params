@@ -238,10 +238,7 @@ dynamic _setAtPath(dynamic root, List<Object> path, dynamic value) {
 ///
 /// Currently, only the following types are supported:
 /// String, int, double, bool, DateTime, or List of these types.
-T? tryParse<T>(String? value) {
-  if (value == null) {
-    return null;
-  }
+T? tryParse<T>(String value) {
   if (T == String || T.toString() == 'String?') {
     return value as T;
   }

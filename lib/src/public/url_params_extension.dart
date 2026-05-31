@@ -75,7 +75,10 @@ extension UrlParamsExtension on BuildContext {
   /// If [parseFromString] is provided, it will be used to parse the value from String to [T].
   /// If not, only the following types are supported by default:
   /// String, int, double, bool, DateTime, or List of these types.
-  T? watchQueryParamFromKey<T>(String key) {
+  T? watchQueryParamFromKey<T>(
+    String key, {
+    T Function(String)? parseFromString,
+  }) {
     final model = InheritedModel.inheritFrom<UrlParamsModel>(
       this,
       aspect: QueryKeyAspect(key),
@@ -88,7 +91,11 @@ extension UrlParamsExtension on BuildContext {
     if (model == null) {
       return null;
     }
-    return tryParse<T>(model.queryParams[key]);
+    final value = model.queryParams[key];
+    if (value == null) {
+      return null;
+    }
+    return parseFromString?.call(value) ?? tryParse<T>(value);
   }
 
   /// Reads typed path params and rebuilds only when this specific
@@ -102,9 +109,14 @@ extension UrlParamsExtension on BuildContext {
   /// Returns `null` if no path param is found for the given [key],
   /// if no [UrlParamsScope] ancestor is found, or if the function
   /// fails to parse the value from String to [T].
-  /// Currently, only the following types are supported for parsing:
+  ///
+  /// If [parseFromString] is provided, it will be used to parse the value from String to [T].
+  /// If not, only the following types are supported by default:
   /// String, int, double, bool, DateTime, or List of these types.
-  T? watchPathParamFromKey<T>(String key) {
+  T? watchPathParamFromKey<T>(
+    String key, {
+    T Function(String)? parseFromString,
+  }) {
     final model = InheritedModel.inheritFrom<UrlParamsModel>(
       this,
       aspect: PathKeyAspect(key),
@@ -117,7 +129,11 @@ extension UrlParamsExtension on BuildContext {
     if (model == null) {
       return null;
     }
-    return tryParse<T>(model.pathParams[key]);
+    final value = model.pathParams[key];
+    if (value == null) {
+      return null;
+    }
+    return parseFromString?.call(value) ?? tryParse<T>(value);
   }
 
   /// Reads typed URL params and rebuilds only when the parsed [T] changes.
