@@ -3,8 +3,6 @@ import 'package:go_router_url_params/go_router_url_params.dart';
 
 part 'person.g.dart';
 
-enum PersonKeys { age, name, person, isActive, label }
-
 @JsonSerializable()
 class Person with UrlParamsData {
   const Person({this.name, this.age = 0, PersonStatus? status})

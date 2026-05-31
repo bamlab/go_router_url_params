@@ -4,8 +4,6 @@ import 'package:go_router_url_params/go_router_url_params.dart';
 part 'person.freezed.dart';
 part 'person.g.dart';
 
-enum PersonKeys { age, name, person, isActive, label }
-
 @freezed
 abstract class Person with _$Person, UrlParamsData {
   const Person._() : super();

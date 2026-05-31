@@ -1,3 +1,4 @@
+import 'package:example/pages/counter_page.dart';
 import 'package:example/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_mappable/dart_mappable.dart';
@@ -51,22 +52,44 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class StatusSwitch extends StatelessWidget {
-  const StatusSwitch({super.key});
+class CounterPage extends StatelessWidget {
+  const CounterPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // This widget will only rebuild when a parameter of type PersonStatus changes
-    // (isActive or labels, for example).
-    // It will not rebuild when an other parameter of type Person changes
-    // (the name or the age, for example).
-    final status = context.watchUrlParams<PersonStatus>() ?? PersonStatus();
+    final person = context.watchUrlParams<Person>();
+    if (person == null) return NobodyFoundInUrl();
 
-    return Switch(
-      value: status.isActive,
-      onChanged: (value) {
-        context.setUrlParams(status.copyWith(isActive: value));
-      },
+    final greeting = person.status.isActive ? 'Hello' : 'Goodbye';
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          context.uri.toString(),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: .center,
+          children: [
+            Text('$greeting, ${person.name}!'),
+            SizedBox(height: 8),
+            const Text('You have pushed the button this many times:'),
+            Text(
+              person.age.toString(),
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.setUrlParams(person.copyWith(age: person.age + 1));
+        },
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

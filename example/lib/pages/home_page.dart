@@ -60,3 +60,24 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+class StatusSwitch extends StatelessWidget {
+  const StatusSwitch({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // This widget will only rebuild when a parameter of type PersonStatus changes
+    // (status.isActive or status.labels, for example).
+    // It will not rebuild when an other parameter of type Person changes
+    // (the name or the age, for example).
+    final status = context.watchUrlParams<PersonStatus>() ?? PersonStatus();
+
+    return Switch(
+      value: status.isActive,
+      onChanged: (value) {
+        // puts "?status.isActive=$value" in the url
+        context.setUrlParams(status.copyWith(isActive: value));
+      },
+    );
+  }
+}

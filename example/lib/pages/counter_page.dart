@@ -1,53 +1,11 @@
-import 'package:example/main.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router_url_params/go_router_url_params.dart';
 
-class CounterPage extends StatelessWidget {
-  const CounterPage({super.key});
+// The CounterPage widget is in the main.dart file to demonstrate the use of watchUrlParams
+// and setUrlParams directly on pub.dev
 
-  @override
-  Widget build(BuildContext context) {
-    final person = context.watchUrlParams<Person>();
-    if (person == null) return Nobody();
-
-    final status = person.status;
-    final greeting = status.isActive ? 'Hello' : 'Goodbye';
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: SelectableText(
-          context.uri.toString(),
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: .center,
-          children: [
-            Text('$greeting, ${person.name}!'),
-            SizedBox(height: 8),
-            const Text('You have pushed the button this many times:'),
-            Text(
-              person.age.toString(),
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.setUrlParams(person.copyWith(age: person.age + 1));
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-}
-
-class Nobody extends StatelessWidget {
-  const Nobody({super.key});
+class NobodyFoundInUrl extends StatelessWidget {
+  const NobodyFoundInUrl({super.key});
 
   @override
   Widget build(BuildContext context) {

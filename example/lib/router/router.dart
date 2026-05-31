@@ -1,5 +1,4 @@
 import 'package:example/main.dart';
-import 'package:example/pages/counter_page.dart';
 import 'package:example/router/paths.dart';
 import 'package:go_router/go_router.dart';
 import 'package:example/pages/home_page.dart';
