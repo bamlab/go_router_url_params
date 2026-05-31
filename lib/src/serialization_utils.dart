@@ -217,10 +217,14 @@ dynamic _setAtPath(dynamic root, List<Object> path, dynamic value) {
   throw StateError('Unsupported path token: ${token.runtimeType}');
 }
 
-/// Function used to parse a string to a typed value.
+/// Parses a single string to a typed scalar value.
 ///
-/// Currently, only the following types are supported:
-/// String, int, double, bool, DateTime, or List of these types.
+/// Currently, only the following scalar types are supported:
+/// String, int, double, bool, DateTime.
+///
+/// For list types, see [tryParseQuery], which consumes the raw
+/// `List<String>` exposed by GoRouter's `uri.queryParametersAll` rather than
+/// a comma-joined string.
 T? tryParse<T>(String value) {
   if (T == String || T.toString() == 'String?') {
     return value as T?;
@@ -237,21 +241,52 @@ T? tryParse<T>(String value) {
   if (T == DateTime || T.toString() == 'DateTime?') {
     return DateTime.tryParse(value) as T?;
   }
-  if (T == (List<String>) || T.toString() == 'List<String>?') {
-    return value.toString().split(',') as T?;
-  }
-  if (T == (List<int>) || T.toString() == 'List<int>?') {
-    return value.toString().split(',').map(int.tryParse).toList() as T?;
-  }
-  if (T == (List<double>) || T.toString() == 'List<double>?') {
-    return value.toString().split(',').map(double.tryParse).toList() as T?;
-  }
-  if (T == (List<bool>) || T.toString() == 'List<bool>?') {
-    return value.toString().split(',').map(bool.tryParse).toList() as T?;
-  }
-  if (T == (List<DateTime>) || T.toString() == 'List<DateTime>?') {
-    return value.toString().split(',').map(DateTime.tryParse).toList() as T?;
-  }
 
   return null;
+}
+
+/// Parses the raw values of a single query key into a typed [T].
+///
+/// GoRouter exposes repeated query keys (`?tag=a&tag=b`) as a `List<String>`
+/// via `uri.queryParametersAll`. This function maps that list to:
+/// - a `List<E>` when [T] is `List<E>` (each element parsed independently;
+///   returns `null` if any element fails to parse), or
+/// - a scalar [T] built from the last value, mirroring the dedup behaviour of
+///   `Uri.queryParameters`.
+///
+/// Returns `null` when [values] is empty or the value(s) cannot be parsed
+/// to [T].
+T? tryParseQuery<T>(List<String> values) {
+  if (T == (List<String>) || T.toString() == 'List<String>?') {
+    return List<String>.of(values) as T?;
+  }
+  if (T == (List<int>) || T.toString() == 'List<int>?') {
+    return _parseList(values, int.tryParse) as T?;
+  }
+  if (T == (List<double>) || T.toString() == 'List<double>?') {
+    return _parseList(values, double.tryParse) as T?;
+  }
+  if (T == (List<bool>) || T.toString() == 'List<bool>?') {
+    return _parseList(values, bool.tryParse) as T?;
+  }
+  if (T == (List<DateTime>) || T.toString() == 'List<DateTime>?') {
+    return _parseList(values, DateTime.tryParse) as T?;
+  }
+
+  if (values.isEmpty) return null;
+  return tryParse<T>(values.last);
+}
+
+/// Parses every element of [values] with [parseElement], returning a properly
+/// typed `List<E>`. Returns `null` as soon as any element fails to parse, so a
+/// single bad element invalidates the whole list rather than being silently
+/// dropped or null-padded.
+List<E>? _parseList<E>(List<String> values, E? Function(String) parseElement) {
+  final result = <E>[];
+  for (final value in values) {
+    final parsed = parseElement(value);
+    if (parsed == null) return null;
+    result.add(parsed);
+  }
+  return result;
 }

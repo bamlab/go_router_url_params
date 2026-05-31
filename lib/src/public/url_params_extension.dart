@@ -72,12 +72,24 @@ extension UrlParamsExtension on BuildContext {
   /// if no [UrlParamsScope] ancestor is found or if the function
   /// fails to parse the value from String to [T].
   ///
-  /// If [parseFromString] is provided, it will be used to parse the value from String to [T].
-  /// If not, only the following types are supported by default:
+  /// Repeated query keys (`?tag=a&tag=b`) are exposed by GoRouter as a list of
+  /// values. Read them with a `List<...>` type to get every value; reading a
+  /// scalar type keeps the last value.
+  ///
+  /// If [parseFromString] is provided it is applied to every value:
+  /// - reading a `List<...>` returns the parsed values,
+  /// - reading a scalar returns the parsed last value.
+  ///
+  /// If [parseFromString] is not provided, only the following types
+  /// are supported by default:
   /// String, int, double, bool, DateTime, or List of these types.
+  ///
+  /// Returns `null` if no value is found for the given [key], if no
+  /// [UrlParamsScope] ancestor is found, or if the value(s) cannot be parsed
+  /// to [T].
   T? watchQueryParamFromKey<T>(
     String key, {
-    T Function(String)? parseFromString,
+    Object? Function(String)? parseFromString,
   }) {
     final model = InheritedModel.inheritFrom<UrlParamsModel>(
       this,
@@ -91,11 +103,19 @@ extension UrlParamsExtension on BuildContext {
     if (model == null) {
       return null;
     }
-    final value = model.queryParams[key];
-    if (value == null) {
+    final values = model.queryParams[key];
+    if (values == null || values.isEmpty) {
       return null;
     }
-    return parseFromString?.call(value) ?? tryParse<T>(value);
+    if (parseFromString != null) {
+      final parsed = [for (final value in values) parseFromString(value)];
+      if (parsed is T) {
+        return parsed as T;
+      }
+      final last = parsed.last;
+      return last is T ? last : null;
+    }
+    return tryParseQuery<T>(values);
   }
 
   /// Reads typed path params and rebuilds only when this specific

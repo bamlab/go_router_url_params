@@ -55,7 +55,7 @@ class UrlParamsModel extends InheritedModel<Object> {
   });
 
   final Map<String, String> pathParams;
-  final Map<String, String> queryParams;
+  final Map<String, List<String>> queryParams;
   final Map<Type, UrlParamsDataBuilder> builders;
   final Map<Type, String?> prefixKeys;
   final Map<Type, UrlParamsData?> parseCache;
@@ -79,7 +79,14 @@ class UrlParamsModel extends InheritedModel<Object> {
     final builder = builders[type]!;
     UrlParamsData? result;
     try {
-      final map = unFlattenParams({...queryParams, ...pathParams});
+      // GoRouter exposes query params as `Map<String, List<String>>`. A single
+      // value collapses to a scalar so it round-trips with the flattened map;
+      // repeated keys stay a list (rebuilt into a List by [unFlattenParams]).
+      final flatQuery = {
+        for (final entry in queryParams.entries)
+          entry.key: entry.value.length == 1 ? entry.value.single : entry.value,
+      };
+      final map = unFlattenParams({...flatQuery, ...pathParams});
       final key = prefixKeys[type];
       if (key != null) {
         result = builder(map[key]);
@@ -107,7 +114,20 @@ class UrlParamsModel extends InheritedModel<Object> {
   @override
   bool updateShouldNotify(UrlParamsModel oldWidget) {
     return !mapEquals(pathParams, oldWidget.pathParams) ||
-        !mapEquals(queryParams, oldWidget.queryParams);
+        !_queryParamsEqual(queryParams, oldWidget.queryParams);
+  }
+
+  /// Deep equality for query params: [mapEquals] alone compares the `List`
+  /// values by identity, so it would miss in-place value changes.
+  static bool _queryParamsEqual(
+    Map<String, List<String>> a,
+    Map<String, List<String>> b,
+  ) {
+    if (a.length != b.length) return false;
+    for (final entry in a.entries) {
+      if (!listEquals(entry.value, b[entry.key])) return false;
+    }
+    return true;
   }
 
   @override
@@ -117,7 +137,10 @@ class UrlParamsModel extends InheritedModel<Object> {
   ) {
     for (final aspect in aspects) {
       if (aspect is QueryKeyAspect) {
-        if (queryParams[aspect.key] != oldWidget.queryParams[aspect.key]) {
+        if (!listEquals(
+          queryParams[aspect.key],
+          oldWidget.queryParams[aspect.key],
+        )) {
           return true;
         }
       } else if (aspect is PathKeyAspect) {

@@ -106,7 +106,7 @@ class UrlParamsScope extends StatefulWidget {
 
 class _UrlParamsScopeState extends State<UrlParamsScope> {
   Map<String, String> pathParams = const {};
-  Map<String, String> queryParams = const {};
+  Map<String, List<String>> queryParams = const {};
 
   @override
   void initState() {
@@ -145,7 +145,7 @@ class _UrlParamsScopeState extends State<UrlParamsScope> {
     try {
       final config = widget.router.routerDelegate.currentConfiguration;
       pathParams = config.pathParameters;
-      queryParams = config.uri.queryParameters;
+      queryParams = config.uri.queryParametersAll;
     } catch (_) {
       // Route not yet matched.
     }

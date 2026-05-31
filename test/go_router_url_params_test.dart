@@ -587,6 +587,101 @@ void main() {
     });
   });
 
+  group('watchQueryParamFromKey - lists', () {
+    testWidgets('reads repeated query keys as a typed list', (tester) async {
+      List<int>? readInts;
+      List<String>? readStrings;
+      List<bool>? readBools;
+      await pumpApp(
+        tester,
+        initialLocation: '/?n=1&n=2&n=3&s=a&s=b&flag=true&flag=false',
+        child: Builder(
+          builder: (context) {
+            readInts = context.watchQueryParamFromKey<List<int>>('n');
+            readStrings = context.watchQueryParamFromKey<List<String>>('s');
+            readBools = context.watchQueryParamFromKey<List<bool>>('flag');
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      expect(readInts, [1, 2, 3]);
+      expect(readStrings, ['a', 'b']);
+      expect(readBools, [true, false]);
+    });
+
+    testWidgets('reads a single occurrence as a one-element list', (
+      tester,
+    ) async {
+      List<int>? read;
+      await pumpApp(
+        tester,
+        initialLocation: '/?n=42',
+        child: Builder(
+          builder: (context) {
+            read = context.watchQueryParamFromKey<List<int>>('n');
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      expect(read, [42]);
+    });
+
+    testWidgets('returns null when any list element has the wrong type', (
+      tester,
+    ) async {
+      List<int>? read;
+      await pumpApp(
+        tester,
+        initialLocation: '/?n=1&n=abc&n=3',
+        child: Builder(
+          builder: (context) {
+            read = context.watchQueryParamFromKey<List<int>>('n');
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      expect(read, isNull);
+    });
+
+    testWidgets('parseFromString is applied to every value', (tester) async {
+      List<dynamic>? read;
+      await pumpApp(
+        tester,
+        initialLocation: '/?flavor=vanilla&flavor=chocolate&flavor=strawberry',
+        child: Builder(
+          builder: (context) {
+            read = context.watchQueryParamFromKey<List<dynamic>>(
+              'flavor',
+              parseFromString: Flavor.parse,
+            );
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      expect(read, [Flavor.vanilla, Flavor.chocolate, Flavor.strawberry]);
+    });
+
+    testWidgets('rebuilds when a value within the list changes', (tester) async {
+      final router = await pumpApp(
+        tester,
+        initialLocation: '/?n=1&n=2',
+        child: Probe(
+          id: 'n',
+          builder: (c) {
+            c.watchQueryParamFromKey<List<int>>('n');
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      final initial = ProbeState.builds['n']!;
+
+      // Same length, one element differs: listEquals must detect the change.
+      router.go('/?n=1&n=3');
+      await tester.pumpAndSettle();
+      expect(ProbeState.builds['n'], initial + 1);
+    });
+  });
+
   group('watchPathParamFromKey', () {
     testWidgets('reads typed value from a path parameter', (tester) async {
       int? readId;
