@@ -218,23 +218,6 @@ dynamic _setAtPath(dynamic root, List<Object> path, dynamic value) {
 }
 
 /// Function used to parse a string to a typed value.
-/// Used to transform a map like this:
-/// ```dart
-/// {
-///   "example": "good",
-///   "bar": ["1","26"],
-///   "foo[0].example2": "true"
-/// }
-/// ```
-/// into this:
-///
-/// ```dart
-/// {
-///   "example": "good",
-///   "bar": [1,26],
-///   "foo[0].example2": true
-/// }
-/// ```
 ///
 /// Currently, only the following types are supported:
 /// String, int, double, bool, DateTime, or List of these types.

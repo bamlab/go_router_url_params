@@ -428,7 +428,7 @@ void main() {
           builder: (context) {
             readName = context.watchQueryParamFromKey<String>('name');
             readAge = context.watchQueryParamFromKey<int>('age');
-            readActive = context.watchQueryParamFromKey<bool>('active');
+            readActive = context.watchQueryParamFromKey<bool?>('active');
             readScore = context.watchQueryParamFromKey<double>('score');
             return const SizedBox.shrink();
           },
@@ -492,33 +492,34 @@ void main() {
       expect(read, isNull);
     });
 
-    testWidgets('returns null when the requested type does not match the value', (
-      tester,
-    ) async {
-      // `age` holds an int, `active` holds a bool: reading each as the other
-      // type must fail gracefully (null) rather than throw or coerce.
-      int? activeAsInt;
-      bool? ageAsBool;
-      double? activeAsDouble;
-      DateTime? ageAsDate;
-      await pumpApp(
-        tester,
-        initialLocation: '/?age=30&active=true',
-        child: Builder(
-          builder: (context) {
-            activeAsInt = context.watchQueryParamFromKey<int>('active');
-            ageAsBool = context.watchQueryParamFromKey<bool>('age');
-            activeAsDouble = context.watchQueryParamFromKey<double>('active');
-            ageAsDate = context.watchQueryParamFromKey<DateTime>('age');
-            return const SizedBox.shrink();
-          },
-        ),
-      );
-      expect(activeAsInt, isNull);
-      expect(ageAsBool, isNull);
-      expect(activeAsDouble, isNull);
-      expect(ageAsDate, isNull);
-    });
+    testWidgets(
+      'returns null when the requested type does not match the value',
+      (tester) async {
+        // `age` holds an int, `active` holds a bool: reading each as the other
+        // type must fail gracefully (null) rather than throw or coerce.
+        int? activeAsInt;
+        bool? ageAsBool;
+        double? activeAsDouble;
+        DateTime? ageAsDate;
+        await pumpApp(
+          tester,
+          initialLocation: '/?age=30&active=true',
+          child: Builder(
+            builder: (context) {
+              activeAsInt = context.watchQueryParamFromKey<int>('active');
+              ageAsBool = context.watchQueryParamFromKey<bool>('age');
+              activeAsDouble = context.watchQueryParamFromKey<double>('active');
+              ageAsDate = context.watchQueryParamFromKey<DateTime>('age');
+              return const SizedBox.shrink();
+            },
+          ),
+        );
+        expect(activeAsInt, isNull);
+        expect(ageAsBool, isNull);
+        expect(activeAsDouble, isNull);
+        expect(ageAsDate, isNull);
+      },
+    );
 
     testWidgets('parseFromString handles a type unsupported by default', (
       tester,
@@ -608,31 +609,32 @@ void main() {
       expect(readId, 42);
     });
 
-    testWidgets('returns null when the requested type does not match the value', (
-      tester,
-    ) async {
-      bool? idAsBool;
-      DateTime? idAsDate;
-      await pumpApp(
-        tester,
-        initialLocation: '/users/42',
-        extraRoutes: [
-          GoRoute(
-            path: '/users/:id',
-            builder: (_, _) => Builder(
-              builder: (context) {
-                idAsBool = context.watchPathParamFromKey<bool>('id');
-                idAsDate = context.watchPathParamFromKey<DateTime>('id');
-                return const SizedBox.shrink();
-              },
+    testWidgets(
+      'returns null when the requested type does not match the value',
+      (tester) async {
+        bool? idAsBool;
+        DateTime? idAsDate;
+        await pumpApp(
+          tester,
+          initialLocation: '/users/42',
+          extraRoutes: [
+            GoRoute(
+              path: '/users/:id',
+              builder: (_, _) => Builder(
+                builder: (context) {
+                  idAsBool = context.watchPathParamFromKey<bool>('id');
+                  idAsDate = context.watchPathParamFromKey<DateTime>('id');
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
-          ),
-        ],
-        child: const SizedBox.shrink(),
-      );
-      expect(idAsBool, isNull);
-      expect(idAsDate, isNull);
-    });
+          ],
+          child: const SizedBox.shrink(),
+        );
+        expect(idAsBool, isNull);
+        expect(idAsDate, isNull);
+      },
+    );
 
     testWidgets('parseFromString handles a type unsupported by default', (
       tester,
