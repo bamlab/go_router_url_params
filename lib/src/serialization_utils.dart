@@ -240,34 +240,34 @@ dynamic _setAtPath(dynamic root, List<Object> path, dynamic value) {
 /// String, int, double, bool, DateTime, or List of these types.
 T? tryParse<T>(String value) {
   if (T == String || T.toString() == 'String?') {
-    return value as T;
+    return value as T?;
   }
   if (T == int || T.toString() == 'int?') {
-    return int.tryParse(value) as T;
+    return int.tryParse(value) as T?;
   }
   if (T == double || T.toString() == 'double?') {
-    return double.tryParse(value) as T;
+    return double.tryParse(value) as T?;
   }
   if (T == bool || T.toString() == 'bool?') {
-    return bool.tryParse(value) as T;
+    return bool.tryParse(value) as T?;
   }
   if (T == DateTime || T.toString() == 'DateTime?') {
-    return DateTime.tryParse(value) as T;
+    return DateTime.tryParse(value) as T?;
   }
   if (T == (List<String>) || T.toString() == 'List<String>?') {
-    return value.toString().split(',') as T;
+    return value.toString().split(',') as T?;
   }
   if (T == (List<int>) || T.toString() == 'List<int>?') {
-    return value.toString().split(',').map(int.tryParse).toList() as T;
+    return value.toString().split(',').map(int.tryParse).toList() as T?;
   }
   if (T == (List<double>) || T.toString() == 'List<double>?') {
-    return value.toString().split(',').map(double.tryParse).toList() as T;
+    return value.toString().split(',').map(double.tryParse).toList() as T?;
   }
   if (T == (List<bool>) || T.toString() == 'List<bool>?') {
-    return value.toString().split(',').map(bool.tryParse).toList() as T;
+    return value.toString().split(',').map(bool.tryParse).toList() as T?;
   }
   if (T == (List<DateTime>) || T.toString() == 'List<DateTime>?') {
-    return value.toString().split(',').map(DateTime.tryParse).toList() as T;
+    return value.toString().split(',').map(DateTime.tryParse).toList() as T?;
   }
 
   return null;

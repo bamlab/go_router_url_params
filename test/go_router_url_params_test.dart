@@ -68,6 +68,14 @@ class Throws with UrlParamsData {
   }
 }
 
+enum Flavor {
+  vanilla,
+  chocolate,
+  strawberry;
+
+  static Flavor parse(String value) => Flavor.values.byName(value);
+}
+
 // =====================================================================
 // Probe: counts how many times a given test widget builds
 // =====================================================================
@@ -483,6 +491,99 @@ void main() {
       );
       expect(read, isNull);
     });
+
+    testWidgets('returns null when the requested type does not match the value', (
+      tester,
+    ) async {
+      // `age` holds an int, `active` holds a bool: reading each as the other
+      // type must fail gracefully (null) rather than throw or coerce.
+      int? activeAsInt;
+      bool? ageAsBool;
+      double? activeAsDouble;
+      DateTime? ageAsDate;
+      await pumpApp(
+        tester,
+        initialLocation: '/?age=30&active=true',
+        child: Builder(
+          builder: (context) {
+            activeAsInt = context.watchQueryParamFromKey<int>('active');
+            ageAsBool = context.watchQueryParamFromKey<bool>('age');
+            activeAsDouble = context.watchQueryParamFromKey<double>('active');
+            ageAsDate = context.watchQueryParamFromKey<DateTime>('age');
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      expect(activeAsInt, isNull);
+      expect(ageAsBool, isNull);
+      expect(activeAsDouble, isNull);
+      expect(ageAsDate, isNull);
+    });
+
+    testWidgets('parseFromString handles a type unsupported by default', (
+      tester,
+    ) async {
+      Flavor? read;
+      await pumpApp(
+        tester,
+        initialLocation: '/?flavor=chocolate',
+        child: Builder(
+          builder: (context) {
+            read = context.watchQueryParamFromKey<Flavor>(
+              'flavor',
+              parseFromString: Flavor.parse,
+            );
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      expect(read, Flavor.chocolate);
+    });
+
+    testWidgets('parseFromString takes precedence over the default parser', (
+      tester,
+    ) async {
+      int? read;
+      await pumpApp(
+        tester,
+        initialLocation: '/?age=30',
+        child: Builder(
+          builder: (context) {
+            read = context.watchQueryParamFromKey<int>(
+              'age',
+              parseFromString: (value) => int.parse(value) * 2,
+            );
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      expect(read, 60);
+    });
+
+    testWidgets('parseFromString is not called when the key is absent', (
+      tester,
+    ) async {
+      var called = false;
+      Flavor? read;
+      await pumpApp(
+        tester,
+        initialLocation: '/',
+        child: Builder(
+          builder: (context) {
+            read = context.watchQueryParamFromKey<Flavor>(
+              'flavor',
+              parseFromString: (value) {
+                called = true;
+                return Flavor.parse(value);
+              },
+            );
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      expect(read, isNull);
+      expect(called, isFalse);
+    });
   });
 
   group('watchPathParamFromKey', () {
@@ -505,6 +606,58 @@ void main() {
         child: const SizedBox.shrink(),
       );
       expect(readId, 42);
+    });
+
+    testWidgets('returns null when the requested type does not match the value', (
+      tester,
+    ) async {
+      bool? idAsBool;
+      DateTime? idAsDate;
+      await pumpApp(
+        tester,
+        initialLocation: '/users/42',
+        extraRoutes: [
+          GoRoute(
+            path: '/users/:id',
+            builder: (_, _) => Builder(
+              builder: (context) {
+                idAsBool = context.watchPathParamFromKey<bool>('id');
+                idAsDate = context.watchPathParamFromKey<DateTime>('id');
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ],
+        child: const SizedBox.shrink(),
+      );
+      expect(idAsBool, isNull);
+      expect(idAsDate, isNull);
+    });
+
+    testWidgets('parseFromString handles a type unsupported by default', (
+      tester,
+    ) async {
+      Flavor? read;
+      await pumpApp(
+        tester,
+        initialLocation: '/flavors/strawberry',
+        extraRoutes: [
+          GoRoute(
+            path: '/flavors/:flavor',
+            builder: (_, _) => Builder(
+              builder: (context) {
+                read = context.watchPathParamFromKey<Flavor>(
+                  'flavor',
+                  parseFromString: Flavor.parse,
+                );
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ],
+        child: const SizedBox.shrink(),
+      );
+      expect(read, Flavor.strawberry);
     });
   });
 
