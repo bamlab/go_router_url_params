@@ -10,8 +10,6 @@ extension UrlParamsExtension on BuildContext {
     Map<String, String> pathParams = const {},
   }) {
     final router = GoRouter.of(this);
-    // Intentionally non-subscribing: callers mutate the URL from callbacks
-    // and must not rebuild on every URL change as a side effect.
     final newQueryParameters = {
       ...router.state.uri.queryParametersAll,
       ...queryParams,
@@ -27,6 +25,10 @@ extension UrlParamsExtension on BuildContext {
     );
   }
 
+  /// Sets the [params] object in the url, rebuilding the UI wherever needed,
+  /// which means wherever [watchUrlParams] is used with the same [T] type.
+  ///
+  /// ---
   /// Warning: Don't name any path parameter with the same key than a query parameter.
   /// If some path param has the same name than a query param, and the function recieves
   /// a value for this name, it can't guess where to put it. In this case, the value
@@ -34,13 +36,9 @@ extension UrlParamsExtension on BuildContext {
   ///
   /// If you really need to do that, you can still use the lower level
   /// [setUrlParamsFromMap] in combinaison with [watchQueryParamFromKey] and [watchPathParamFromKey]
-  ///
-  /// ---
-  ///
-  /// Sets the [params] object in the url, rebuilding the UI wherever needed,
-  /// which means wherever [watchUrlParams] is used.
-  void setUrlParams(UrlParamsData params) {
-    final flattenedParams = flattenParams(params.toMap());
+  void setUrlParams<T extends UrlParamsData>(T params) {
+    final key = UrlParamsScope.prefixKeysOf(this)[T];
+    final flattenedParams = flattenParams(params.toMap(), prefix: key);
 
     final pathParamsKeys = GoRouter.of(this).state.pathParameters.keys;
     final pathParams = Map.fromEntries(
@@ -67,12 +65,13 @@ extension UrlParamsExtension on BuildContext {
   ///
   /// Example:
   /// ```dart
-  /// final age = context.watchQueryParamFromKey('age'); // age is int or null
+  /// final age = context.watchQueryParamFromKey('age');
   /// ```
-  /// Returns `null` if no query param is found or if the function
+  /// Returns `null` if no query param is found for the given [key] or if the function
   /// fails to parse the value from String to [T].
   ///
-  /// Currently, only the following types are supported:
+  /// If [parseFromString] is provided, it will be used to parse the value from String to [T].
+  /// If not, only the following types are supported by default:
   /// String, int, double, bool, DateTime, or List of these types.
   T? watchQueryParamFromKey<T>(String key) {
     final model = InheritedModel.inheritFrom<UrlParamsModel>(
@@ -95,8 +94,7 @@ extension UrlParamsExtension on BuildContext {
   /// ```
   /// Returns `null` if no path param is found or if the function
   /// fails to parse the value from String to [T].
-  ///
-  /// Currently, only the following types are supported:
+  /// Currently, only the following types are supported for parsing:
   /// String, int, double, bool, DateTime, or List of these types.
   T? watchPathParamFromKey<T>(String key) {
     final model = InheritedModel.inheritFrom<UrlParamsModel>(

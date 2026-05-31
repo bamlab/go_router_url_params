@@ -22,7 +22,10 @@ class MyApp extends StatelessWidget {
         router: router,
         builders: [
           UrlParamBuilder<Person>(PersonMapper.fromMap),
-          UrlParamBuilder<PersonStatus>(PersonStatusMapper.fromMap),
+          UrlParamBuilder<PersonStatus>(
+            PersonStatusMapper.fromMap,
+            prefixKey: "status",
+          ),
         ],
         child: child!,
       ),

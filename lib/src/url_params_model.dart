@@ -48,6 +48,7 @@ class UrlParamsModel extends InheritedModel<Object> {
     required this.pathParams,
     required this.queryParams,
     required this.builders,
+    required this.prefixKeys,
     required this.parseCache,
     required this.flatCache,
     required super.child,
@@ -56,6 +57,7 @@ class UrlParamsModel extends InheritedModel<Object> {
   final Map<String, String> pathParams;
   final Map<String, String> queryParams;
   final Map<Type, UrlParamsDataBuilder> builders;
+  final Map<Type, String?> prefixKeys;
   final Map<Type, UrlParamsData?> parseCache;
 
   /// Flattened `toJson()` for each parsed type, populated alongside
@@ -76,13 +78,18 @@ class UrlParamsModel extends InheritedModel<Object> {
     );
     final builder = builders[type]!;
     UrlParamsData? result;
-    if (builder != null) {
-      try {
-        result = builder(unFlattenParams({...queryParams, ...pathParams}));
-      } catch (_) {
-        result = null;
+    try {
+      final map = unFlattenParams({...queryParams, ...pathParams});
+      final key = prefixKeys[type];
+      if (key != null) {
+        result = builder(map[key]);
+      } else {
+        result = builder(map);
       }
+    } catch (e) {
+      result = null;
     }
+
     parseCache[type] = result;
     flatCache[type] = result == null ? null : flattenParams(result.toMap());
     return result;

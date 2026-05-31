@@ -8,9 +8,39 @@ import 'package:go_router_url_params/src/url_params_model.dart';
 /// One [UrlParamBuilder] per concrete [UrlParamsData] subclass tells the
 /// scope how to deserialize that type from the URL.
 class UrlParamBuilder<T extends UrlParamsData> {
-  const UrlParamBuilder(this.builder);
+  const UrlParamBuilder(this.builder, {this.prefixKey});
 
   final UrlParamsDataBuilder<T> builder;
+
+  /// By providing a [prefixKey], you can differentiate the URL params of different types,
+  /// and avoid conflicts between them.
+  /// If non null, the URL params will be prefixed with the given key.
+  /// If null, the URL params will not be prefixed.
+  ///
+  /// Example:
+  /// ```dart
+  /// class Person with UrlParamsData {
+  ///   final String name;
+  ///   final int age;
+  ///   [... constructor and fromMap ...]
+  /// }
+  /// class PersonStatus with UrlParamsData {
+  ///   final bool isActive;
+  ///   [... constructor and fromMap ...]
+  /// }
+  /// ```
+  /// The following [UrlParamBuilder]s:
+  /// ```dart
+  /// [
+  /// UrlParamBuilder<Person>(PersonMapper.fromMap),
+  /// UrlParamBuilder<PersonStatus>(PersonStatusMapper.fromMap, prefixKey: "status"),
+  /// ]
+  /// ```
+  /// Will generate the following URL params:
+  /// ```dart
+  /// "?age=25&name=John&status.isActive=true"
+  /// ```
+  final String? prefixKey;
 
   Type get type => T;
 }
@@ -58,6 +88,17 @@ class UrlParamsScope extends StatefulWidget {
   final List<UrlParamBuilder> builders;
 
   final Widget child;
+
+  static Map<Type, String?> prefixKeysOf(BuildContext context) {
+    return (context
+                    .getElementForInheritedWidgetOfExactType<
+                      _InheritedUrlParamsScope
+                    >()
+                    ?.widget
+                as _InheritedUrlParamsScope?)
+            ?.prefixKeys ??
+        {};
+  }
 
   @override
   State<UrlParamsScope> createState() => _UrlParamsScopeState();
@@ -118,13 +159,31 @@ class _UrlParamsScopeState extends State<UrlParamsScope> {
 
   @override
   Widget build(BuildContext context) {
-    return UrlParamsModel(
-      pathParams: pathParams,
-      queryParams: queryParams,
-      builders: {for (final e in widget.builders) e.type: e.builder},
-      parseCache: <Type, UrlParamsData?>{},
-      flatCache: <Type, Map<String, dynamic>?>{},
-      child: widget.child,
+    return _InheritedUrlParamsScope(
+      prefixKeys: {for (final e in widget.builders) e.type: e.prefixKey},
+      child: UrlParamsModel(
+        pathParams: pathParams,
+        queryParams: queryParams,
+        builders: {for (final e in widget.builders) e.type: e.builder},
+        prefixKeys: {for (final e in widget.builders) e.type: e.prefixKey},
+        parseCache: <Type, UrlParamsData?>{},
+        flatCache: <Type, Map<String, dynamic>?>{},
+        child: widget.child,
+      ),
     );
+  }
+}
+
+class _InheritedUrlParamsScope extends InheritedWidget {
+  const _InheritedUrlParamsScope({
+    required super.child,
+    required this.prefixKeys,
+  });
+
+  final Map<Type, String?> prefixKeys;
+
+  @override
+  bool updateShouldNotify(covariant _InheritedUrlParamsScope oldWidget) {
+    return prefixKeys != oldWidget.prefixKeys;
   }
 }
