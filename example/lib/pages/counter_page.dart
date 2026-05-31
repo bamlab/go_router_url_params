@@ -1,4 +1,4 @@
-import 'package:example/model/dart_mappable/person.dart';
+import 'package:example/main.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router_url_params/go_router_url_params.dart';
 

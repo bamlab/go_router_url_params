@@ -1,4 +1,4 @@
-import 'package:example/model/dart_mappable/person.dart';
+import 'package:example/main.dart';
 import 'package:example/router/paths.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -57,27 +57,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class StatusSwitch extends StatelessWidget {
-  const StatusSwitch({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // This widget will only rebuild when a parameter of type PersonStatus changes
-    // (isActive or labels, for example).
-    // It will not rebuild when an other parameter of type Person changes
-    // (the name or the age, for example).
-    final status = context.watchUrlParams<PersonStatus>();
-    if (status == null) return const SizedBox.shrink();
-
-    return Switch(
-      value: status.isActive,
-      onChanged: (value) {
-        context.setUrlParams(status.copyWith(isActive: value));
-      },
     );
   }
 }

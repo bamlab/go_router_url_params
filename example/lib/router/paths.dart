@@ -1,4 +1,4 @@
-import 'package:example/model/dart_mappable/person.dart';
+import 'package:example/main.dart';
 import 'package:equatable/equatable.dart';
 
 class Path with EquatableMixin {
