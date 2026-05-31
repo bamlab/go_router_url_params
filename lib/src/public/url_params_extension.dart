@@ -62,12 +62,14 @@ extension UrlParamsExtension on BuildContext {
 
   /// Reads typed query param and rebuilds only when this specific
   /// query parameter changes.
+  /// Requires a [UrlParamsScope] ancestor to trigger a rebuild when the value changes.
   ///
   /// Example:
   /// ```dart
   /// final age = context.watchQueryParamFromKey('age');
   /// ```
-  /// Returns `null` if no query param is found for the given [key] or if the function
+  /// Returns `null` if no query param is found for the given [key],
+  /// if no [UrlParamsScope] ancestor is found or if the function
   /// fails to parse the value from String to [T].
   ///
   /// If [parseFromString] is provided, it will be used to parse the value from String to [T].
@@ -78,21 +80,27 @@ extension UrlParamsExtension on BuildContext {
       this,
       aspect: QueryKeyAspect(key),
     );
-    if (model != null) {
-      return tryParse<T>(model.queryParams[key]);
+    assert(
+      model != null,
+      'watchQueryParamFromKey<$T>() requires a UrlParamsScope ancestor with a '
+      'registered UrlParamBuilder<$T>.',
+    );
+    if (model == null) {
+      return null;
     }
-    // fall back to the router's state
-    return tryParse<T>(uri.queryParameters[key]);
+    return tryParse<T>(model.queryParams[key]);
   }
 
   /// Reads typed path params and rebuilds only when this specific
   /// path parameter changes.
+  /// Requires a [UrlParamsScope] ancestor to trigger a rebuild when the value changes.
   ///
   /// Example:
   /// ```dart
   /// final name = context.watchPathParamFromKey('name');
   /// ```
-  /// Returns `null` if no path param is found or if the function
+  /// Returns `null` if no path param is found for the given [key],
+  /// if no [UrlParamsScope] ancestor is found, or if the function
   /// fails to parse the value from String to [T].
   /// Currently, only the following types are supported for parsing:
   /// String, int, double, bool, DateTime, or List of these types.
@@ -101,11 +109,15 @@ extension UrlParamsExtension on BuildContext {
       this,
       aspect: PathKeyAspect(key),
     );
-    if (model != null) {
-      return tryParse<T>(model.pathParams[key]);
+    assert(
+      model != null,
+      'watchPathParamFromKey<$T>() requires a UrlParamsScope ancestor with a '
+      'registered UrlParamBuilder<$T>.',
+    );
+    if (model == null) {
+      return null;
     }
-    // fall back to the router's state
-    return tryParse<T>(GoRouter.of(this).state.pathParameters[key]);
+    return tryParse<T>(model.pathParams[key]);
   }
 
   /// Reads typed URL params and rebuilds only when the parsed [T] changes.
