@@ -19,7 +19,9 @@ extension UrlParamsExtension on BuildContext {
       router.state.uri
           .replace(
             path: formatPath(router.state.fullPath ?? '', newPathParameters),
-            queryParameters: newQueryParameters,
+            queryParameters: newQueryParameters.isNotEmpty
+                ? newPathParameters
+                : null,
           )
           .toString(),
     );
@@ -135,7 +137,7 @@ extension UrlParamsExtension on BuildContext {
   /// String, int, double, bool, DateTime, or List of these types.
   T? watchPathParamFromKey<T>(
     String key, {
-    T Function(String)? parseFromString,
+    T? Function(String)? parseFromString,
   }) {
     final model = InheritedModel.inheritFrom<UrlParamsModel>(
       this,
@@ -153,7 +155,9 @@ extension UrlParamsExtension on BuildContext {
     if (value == null) {
       return null;
     }
-    return parseFromString?.call(value) ?? tryParse<T>(value);
+    return parseFromString != null
+        ? parseFromString(value)
+        : tryParse<T>(value);
   }
 
   /// Reads typed URL params and rebuilds only when the parsed [T] changes.

@@ -1,4 +1,5 @@
 import 'package:example/main.dart';
+import 'package:example/pages/tab_view_demo/flavor.dart';
 import 'package:example/router/paths.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -52,6 +53,12 @@ class _HomePageState extends State<HomePage> {
                   ).location,
                 ),
                 child: const Text('Go to Counter'),
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () =>
+                    context.go(tabViewDemo(Flavor.defaultFlavor).location),
+                child: const Text('Go to Tab View Demo'),
               ),
             ],
           ),
