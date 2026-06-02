@@ -2,6 +2,11 @@
 
 Type the path and query parameters of your [go_router](https://pub.dev/packages/go_router) URLs, read them as plain Dart objects, and write them back — without keeping a second copy of that state anywhere else.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/bamlab/go_router_url_params/main/doc/demo_counter.gif" width="45%" />
+  <img src="https://raw.githubusercontent.com/bamlab/go_router_url_params/main/doc/demo_tab_view.gif" width="45%" />
+</p>
+
 ## Motivation
 
 The URL already holds part of your application state: the current route, its path parameters, and its query string.
