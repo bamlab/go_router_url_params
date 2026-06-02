@@ -290,3 +290,11 @@ List<E>? _parseList<E>(List<String> values, E? Function(String) parseElement) {
   }
   return result;
 }
+
+String formatToQueryString(Map<String, List<String>> queryParameters) {
+  return queryParameters.entries.map(_queryParamEntryToString).join('&');
+}
+
+String _queryParamEntryToString(MapEntry<String, List<String>> entry) {
+  return entry.value.map((value) => '${entry.key}=$value').join('&');
+}

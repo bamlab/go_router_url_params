@@ -15,12 +15,13 @@ extension UrlParamsExtension on BuildContext {
       ...queryParams,
     };
     final newPathParameters = {...router.state.pathParameters, ...pathParams};
+
     router.go(
       router.state.uri
           .replace(
             path: formatPath(router.state.fullPath ?? '', newPathParameters),
-            queryParameters: newQueryParameters.isNotEmpty
-                ? newPathParameters
+            query: newQueryParameters.isNotEmpty
+                ? formatToQueryString(newQueryParameters)
                 : null,
           )
           .toString(),

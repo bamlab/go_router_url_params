@@ -661,7 +661,9 @@ void main() {
       expect(read, [Flavor.vanilla, Flavor.chocolate, Flavor.strawberry]);
     });
 
-    testWidgets('rebuilds when a value within the list changes', (tester) async {
+    testWidgets('rebuilds when a value within the list changes', (
+      tester,
+    ) async {
       final router = await pumpApp(
         tester,
         initialLocation: '/?n=1&n=2',

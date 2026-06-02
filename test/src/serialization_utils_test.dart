@@ -87,4 +87,18 @@ void main() {
     final unflattenedMap = unFlattenParams(flattenedMap);
     expect(unflattenedMap, nestedMap);
   });
+
+  test('formatToQueryString', () async {
+    final queryParameters = {
+      "example": ["good"],
+      "bar": ["1", "26"],
+      "foo[0].example2": ["true"],
+      "foo[0].example3[0]": ["42"],
+    };
+    final result = formatToQueryString(queryParameters);
+    expect(
+      result,
+      "example=good&bar=1&bar=26&foo[0].example2=true&foo[0].example3[0]=42",
+    );
+  });
 }
