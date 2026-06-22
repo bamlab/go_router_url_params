@@ -50,14 +50,13 @@ class _HomePageState extends State<HomePage> {
                   counter(
                     Person(name: nameController.text, status: status),
                     currentUri: context.uri,
-                  ).location,
+                  ),
                 ),
                 child: const Text('Go to Counter'),
               ),
               SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () =>
-                    context.go(tabViewDemo(Flavor.defaultFlavor).location),
+                onPressed: () => context.go(tabViewDemo(Flavor.defaultFlavor)),
                 child: const Text('Go to Tab View Demo'),
               ),
             ],
