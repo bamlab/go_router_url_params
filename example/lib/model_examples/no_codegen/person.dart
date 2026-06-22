@@ -27,6 +27,12 @@ class Person with UrlParamsData {
     _PersonKeys.age.name: age,
     _PersonKeys.status.name: status.toMap(),
   };
+
+  Person copyWith({String? name, int? age, PersonStatus? status}) => Person(
+    name: name ?? this.name,
+    age: age ?? this.age,
+    status: status ?? this.status,
+  );
 }
 
 class PersonStatus with UrlParamsData {

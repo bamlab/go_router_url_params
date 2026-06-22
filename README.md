@@ -16,18 +16,19 @@ The URL already holds part of your application state: the current route, its
 path parameters, and its query string.
 
 - First problem: this state is often awkward to read in a typed way, because a
-  URL is entirely a string, and dart doesn't support reflection at runtime for
-  performance reasons, which makes it hard to parse any string into a typed
-  object like javascript does.
+  URL is entirely a string Since dart doesn't support reflection at runtime for
+  performance reasons, it can be hard to parse such a string into a typed object
+  like javascript does.
 - Second problem: this state doesn't belong to the state management library that
   you probably use (riverpod, bloc, provider, etc.), so manipulating the URL as
   state management requires its own project standards, which are often complex
   yet implicit.
 
-For these reasons, it is tempting to replicate it into your state management and
-keep the two in sync by hand. That duplication introduces boilerplate,
-imperativeness (one variable "name" in your state management, one query param
-"initialName", side effects between the two), and unnecessary complexity.
+For these reasons, it is tempting to replicate the url information into your
+state management and keep the two in sync by hand. That duplication introduces
+boilerplate, imperativeness (one variable "name" in your state management, one
+query param "initialName", side effects to sync them both), and unnecessary
+complexity.
 
 In short, bugs.
 
@@ -50,7 +51,8 @@ the `dependencies` of your `pubspec.yaml` manually. You also need
 ## 1. Make your data classes serializable
 
 A class participates by mixing in `UrlParamsData` and providing `toMap()` plus a
-`fromMap` factory:
+`fromMap` factory. It's also a good idea to provide a `copyWith` method to
+update the url easily:
 
 ```dart
 class Person with UrlParamsData {
@@ -99,12 +101,17 @@ class PersonStatus with UrlParamsData {
 }
 ```
 
-Sounds complex? Ok that's fair.
-
-But `toMap`/`fromMap`/`copyWith` are exactly the methods code generators
-produce, so you don't have to write them by hand. The
-`example/lib/model_examples/` folder shows the same model generated with
+If it sounds complex, remember that `toMap`/`fromMap`/`copyWith` are exactly the
+methods code generators produce, so you don't have to write them by hand. The
+`example/lib/model_examples/` folder shows this same model generated with
 `dart_mappable`, `freezed`, and `json_serializable`.
+
+`dart_mappable` is more recommended because it has the exact default behavior
+this package needs. `freezed` and `json_serializable` need the
+`UrlParamsData.tryParse`, `UrlParamsData.readObjectFromString` and
+`UrlParamsData.writeObjectToJson` methods, which can be tricky to use. If you
+want to use `freezed` or `json_serializable`, please look at the
+`example/lib/model_examples/` folder.
 
 ## 2. Add the scope below `MaterialApp.router`
 
@@ -126,10 +133,10 @@ MaterialApp.router(
 )
 ```
 
-## 3. Read and write typed params
+## 3. Read and write typed params in widgets
 
 ```dart
-// Read. Rebuilds only when the Person slice of the URL changes.
+// Read. Rebuilds the widget only when the Person slice of the URL changes.
 final person = context.watchUrlParams<Person>();
 
 // Write. Updates the URL, which rebuilds the widgets that read it.
@@ -145,10 +152,10 @@ Be really careful with nullability and default values.
 ## How rebuilds are scoped
 
 A widget that uses `watchUrlParams<T>()` to read a type `T` rebuilds only when
-the parsed `T` changes; it does not rebuild when an unrelated field changes,
-even though both live in the same URL. Parsing is cached per type for the
-lifetime of a URL, so a registered builder runs at most once per URL change
-regardless of how many widgets read that type.
+the params needed to build `T` change; it does not rebuild when an unrelated
+field changes, even though both live in the same URL. Parsing is cached per type
+for the lifetime of a URL, so a registered builder runs at most once per URL
+change regardless of how many widgets read that type.
 
 ---
 
@@ -196,8 +203,9 @@ UrlParamsScope(
   ),
 ```
 
-With `prefixKey: "status"`, `PersonStatus.isActive` is written as
-`?status.isActive=true` instead of `?isActive=true`.
+With `prefixKey: "status"`, the query param corresponding to
+`PersonStatus.isActive` is written as `?status.isActive=true` instead of
+`?isActive=true`.
 
 ## Lower level: Reading a single key
 
@@ -224,14 +232,14 @@ go_router exposes repeated query keys (`?tag=a&tag=b`) as a list. Read them with
 a `List` type to get every value; reading a scalar type keeps the last value:
 
 ```dart
-final tags = context.watchQueryParamFromKey<List<String>>('tag'); // ['a', 'b']
-final ids  = context.watchQueryParamFromKey<List<int>>('id');     // null if any value isn't an int
+final tags = context.watchQueryParamFromKey<List<String>>('tag'); // somePath?tag=a&tag=b  -->  ['a', 'b']
+final ids  = context.watchQueryParamFromKey<List<int>>('id');     // null if no value is parsable to an int
 ```
 
 ## Lower-level: writes
 
 `setUrlParamsFromMap` writes raw query and path maps, bypassing the typed object
-layer. Pair it with the single-key readers when you need full control:
+layer. Pair it with the single-key readers.
 
 ```dart
 context.setUrlParamsFromMap(
