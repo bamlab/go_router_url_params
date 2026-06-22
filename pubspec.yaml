@@ -1,8 +1,8 @@
-name: go_router_url_params
+name: go_router_url_watcher
 description: "Easily keep your state in the url when using go_router in Flutter"
 version: 0.0.1
-homepage: https://github.com/bamlab/go_router_url_params
-repository: https://github.com/bamlab/go_router_url_params
+homepage: https://github.com/bamlab/go_router_url_watcher
+repository: https://github.com/bamlab/go_router_url_watcher
 
 environment:
   sdk: ^3.10.4

@@ -264,7 +264,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "17.2.3"
-  go_router_url_params:
+  go_router_url_watcher:
     dependency: "direct main"
     description:
       path: ".."

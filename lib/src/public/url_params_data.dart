@@ -1,4 +1,4 @@
-import 'package:go_router_url_params/src/serialization_utils.dart';
+import 'package:go_router_url_watcher/src/serialization_utils.dart';
 
 typedef UrlParamsDataBuilder<T extends UrlParamsData> =
     T Function(Map<String, dynamic> params);

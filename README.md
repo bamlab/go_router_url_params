@@ -1,28 +1,47 @@
-# go_router_url_params
+# go_router_url_watcher
 
-Type the path and query parameters of your [go_router](https://pub.dev/packages/go_router) URLs, read them as plain Dart objects, and write them back — without keeping a second copy of that state anywhere else.
+Type the path and query parameters of your
+[go_router](https://pub.dev/packages/go_router) URLs, read them as plain Dart
+objects, and write them back — without keeping a second copy of that state
+anywhere else.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/bamlab/go_router_url_params/main/doc/demo_counter.gif" width="45%" />
-  <img src="https://raw.githubusercontent.com/bamlab/go_router_url_params/main/doc/demo_tab_view.gif" width="45%" />
+  <img src="https://raw.githubusercontent.com/bamlab/go_router_url_watcher/main/doc/demo_counter.gif" width="45%" />
+  <img src="https://raw.githubusercontent.com/bamlab/go_router_url_watcher/main/doc/demo_tab_view.gif" width="45%" />
 </p>
 
 ## Motivation
 
-The URL already holds part of your application state: the current route, its path parameters, and its query string.
+The URL already holds part of your application state: the current route, its
+path parameters, and its query string.
 
-- First problem: this state is often awkward to read in a typed way, because a URL is entirely a string, and dart doesn't support reflection at runtime for performance reasons, which makes it hard to parse any string into a typed object like javascript does.
-- Second problem: this state doesn't belong to the state management library that you probably use (riverpod, bloc, provider, etc.), so manipulating the URL as state management requires its own project standards, which are often complex yet implicit.
+- First problem: this state is often awkward to read in a typed way, because a
+  URL is entirely a string, and dart doesn't support reflection at runtime for
+  performance reasons, which makes it hard to parse any string into a typed
+  object like javascript does.
+- Second problem: this state doesn't belong to the state management library that
+  you probably use (riverpod, bloc, provider, etc.), so manipulating the URL as
+  state management requires its own project standards, which are often complex
+  yet implicit.
 
-For these reasons, it is tempting to replicate it into your state management and keep the two in sync by hand. That duplication introduces boilerplate, imperativeness (one variable "name" in your state management, one query param "initialName", side effects between the two), and unnecessary complexity.
+For these reasons, it is tempting to replicate it into your state management and
+keep the two in sync by hand. That duplication introduces boilerplate,
+imperativeness (one variable "name" in your state management, one query param
+"initialName", side effects between the two), and unnecessary complexity.
 
 In short, bugs.
 
-**go_router_url_params** fills that gap by reusing the `fromMap`/`toMap` methods that a data class often exposes, and defining a simple, performant interface to read and write the URL as typed objects. The URL becomes the single source of truth, and your widgets read it as typed objects. No boilerplate, no duplicated state.
+**go_router_url_watcher** fills that gap by reusing the `fromMap`/`toMap`
+methods that a data class often exposes, and defining a simple, performant
+interface to read and write the URL as typed objects. The URL becomes the single
+source of truth, and your widgets read it as typed objects. No boilerplate, no
+duplicated state.
 
 ## Installation
 
-Use `flutter pub add go_router_url_params`, or add `go_router_url_params` to the `dependencies` of your `pubspec.yaml` manually. You also need [go_router](https://pub.dev/packages/go_router) itself.
+Use `flutter pub add go_router_url_watcher`, or add `go_router_url_watcher` to
+the `dependencies` of your `pubspec.yaml` manually. You also need
+[go_router](https://pub.dev/packages/go_router) itself.
 
 ---
 
@@ -30,7 +49,8 @@ Use `flutter pub add go_router_url_params`, or add `go_router_url_params` to the
 
 ## 1. Make your data classes serializable
 
-A class participates by mixing in `UrlParamsData` and providing `toMap()` plus a `fromMap` factory:
+A class participates by mixing in `UrlParamsData` and providing `toMap()` plus a
+`fromMap` factory:
 
 ```dart
 class Person with UrlParamsData {
@@ -81,11 +101,15 @@ class PersonStatus with UrlParamsData {
 
 Sounds complex? Ok that's fair.
 
-But `toMap`/`fromMap`/`copyWith` are exactly the methods code generators produce, so you don't have to write them by hand. The `example/lib/model_examples/` folder shows the same model generated with `dart_mappable`, `freezed`, and `json_serializable`.
+But `toMap`/`fromMap`/`copyWith` are exactly the methods code generators
+produce, so you don't have to write them by hand. The
+`example/lib/model_examples/` folder shows the same model generated with
+`dart_mappable`, `freezed`, and `json_serializable`.
 
 ## 2. Add the scope below `MaterialApp.router`
 
-`UrlParamsScope` subscribes to the router and republishes its parameters. Register one `UrlParamBuilder` per type any widget will read:
+`UrlParamsScope` subscribes to the router and republishes its parameters.
+Register one `UrlParamBuilder` per type any widget will read:
 
 ```dart
 MaterialApp.router(
@@ -112,13 +136,19 @@ final person = context.watchUrlParams<Person>();
 context.setUrlParams(person.copyWith(age: person.age + 1));
 ```
 
-`watchUrlParams<T>()` returns `null` when no `Person` can be parsed from the current URL, so you should pay attention to that case.
+`watchUrlParams<T>()` returns `null` when no `Person` can be parsed from the
+current URL, so you should pay attention to that case.
 
-Globally, you can consider that anything can be in the URL (especially in web). Be really careful with nullability and default values.
+Globally, you can consider that anything can be in the URL (especially in web).
+Be really careful with nullability and default values.
 
 ## How rebuilds are scoped
 
-A widget that uses `watchUrlParams<T>()` to read a type `T` rebuilds only when the parsed `T` changes; it does not rebuild when an unrelated field changes, even though both live in the same URL. Parsing is cached per type for the lifetime of a URL, so a registered builder runs at most once per URL change regardless of how many widgets read that type.
+A widget that uses `watchUrlParams<T>()` to read a type `T` rebuilds only when
+the parsed `T` changes; it does not rebuild when an unrelated field changes,
+even though both live in the same URL. Parsing is cached per type for the
+lifetime of a URL, so a registered builder runs at most once per URL change
+regardless of how many widgets read that type.
 
 ---
 
@@ -126,7 +156,11 @@ A widget that uses `watchUrlParams<T>()` to read a type `T` rebuilds only when t
 
 ## Building a URL to navigate to
 
-`UrlParamsData.toQueryParamsString` turns a `UrlParamsData` into a query string for `context.go`. Use `keysToIgnore`/`keysToInclude` to control which fields are serialized (for instance, to drop a field that is already a path parameter), and pass `currentUri` to merge with the query params already present, if you don't want the rest of your state to be lost:
+`UrlParamsData.toQueryParamsString` turns a `UrlParamsData` into a query string
+for `context.go`. Use `keysToIgnore`/`keysToInclude` to control which fields are
+serialized (for instance, to drop a field that is already a path parameter), and
+pass `currentUri` to merge with the query params already present, if you don't
+want the rest of your state to be lost:
 
 ```dart
 context.go(
@@ -139,11 +173,15 @@ context.go(
 
 ## One limitation: avoid using the same name for a path param and a query param
 
-Path parameters and query parameters share one flat namespace when written. Do not give a path parameter the same name as a query parameter: if both exist, the value is assigned to the path parameter and the query parameter stays empty. If you genuinely need overlapping names, drop down to the lower-level API below.
+Path parameters and query parameters share one flat namespace when written. Do
+not give a path parameter the same name as a query parameter: if both exist, the
+value is assigned to the path parameter and the query parameter stays empty. If
+you genuinely need overlapping names, drop down to the lower-level API below.
 
 ## Disambiguating types with `prefixKey`
 
-If two registered types expose colliding field names, or if you want to register to a sub-slice of a type, you can give a `prefixKey` in the `UrlParamBuilder`.
+If two registered types expose colliding field names, or if you want to register
+to a sub-slice of a type, you can give a `prefixKey` in the `UrlParamBuilder`.
 
 Example:
 
@@ -156,14 +194,16 @@ UrlParamsScope(
     ],
     child: child!,
   ),
-
 ```
 
-With `prefixKey: "status"`, `PersonStatus.isActive` is written as `?status.isActive=true` instead of `?isActive=true`.
+With `prefixKey: "status"`, `PersonStatus.isActive` is written as
+`?status.isActive=true` instead of `?isActive=true`.
 
 ## Lower level: Reading a single key
 
-When you do not want to model a whole object, read one parameter at a time. These also require a `UrlParamsScope` ancestor and rebuild only when that specific key changes:
+When you do not want to model a whole object, read one parameter at a time.
+These also require a `UrlParamsScope` ancestor and rebuild only when that
+specific key changes:
 
 ```dart
 final age = context.watchQueryParamFromKey<int>('age');
@@ -171,13 +211,17 @@ final personName = context.watchPathParamFromKey<String>('name');
 final favoriteFlavor = context.watchQueryParamFromKey<FlavorEnum>('flavor', parseFromString: (value) => Flavor.values.byName(value));
 ```
 
-Supported types by default: `String`, `int`, `double`, `bool`, `DateTime`, and (for query params) a `List` of these. For other types, you can provide a `parseFromString` function to parse the value from String to the requested type.
+Supported types by default: `String`, `int`, `double`, `bool`, `DateTime`, and
+(for query params) a `List` of these. For other types, you can provide a
+`parseFromString` function to parse the value from String to the requested type.
 
-A value that cannot be parsed to the requested type returns `null` rather than throwing — reading `age` as a `bool` gives `null`.
+A value that cannot be parsed to the requested type returns `null` rather than
+throwing — reading `age` as a `bool` gives `null`.
 
 ### Lists (query params only)
 
-go_router exposes repeated query keys (`?tag=a&tag=b`) as a list. Read them with a `List` type to get every value; reading a scalar type keeps the last value:
+go_router exposes repeated query keys (`?tag=a&tag=b`) as a list. Read them with
+a `List` type to get every value; reading a scalar type keeps the last value:
 
 ```dart
 final tags = context.watchQueryParamFromKey<List<String>>('tag'); // ['a', 'b']
@@ -186,7 +230,8 @@ final ids  = context.watchQueryParamFromKey<List<int>>('id');     // null if any
 
 ## Lower-level: writes
 
-`setUrlParamsFromMap` writes raw query and path maps, bypassing the typed object layer. Pair it with the single-key readers when you need full control:
+`setUrlParamsFromMap` writes raw query and path maps, bypassing the typed object
+layer. Pair it with the single-key readers when you need full control:
 
 ```dart
 context.setUrlParamsFromMap(

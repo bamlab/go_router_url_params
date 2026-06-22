@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:go_router_url_params/go_router_url_params.dart';
-import 'package:go_router_url_params/src/serialization_utils.dart';
-import 'package:go_router_url_params/src/url_params_model.dart';
+import 'package:go_router_url_watcher/go_router_url_watcher.dart';
+import 'package:go_router_url_watcher/src/serialization_utils.dart';
+import 'package:go_router_url_watcher/src/url_params_model.dart';
 
 extension UrlParamsExtension on BuildContext {
   void setUrlParamsFromMap({

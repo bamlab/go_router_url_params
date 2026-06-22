@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router_url_params/src/public/url_params_data.dart';
-import 'package:go_router_url_params/src/serialization_utils.dart';
+import 'package:go_router_url_watcher/src/public/url_params_data.dart';
+import 'package:go_router_url_watcher/src/serialization_utils.dart';
 
 class QueryKeyAspect {
   const QueryKeyAspect(this.key);

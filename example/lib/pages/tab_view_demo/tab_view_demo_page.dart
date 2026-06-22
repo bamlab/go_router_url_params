@@ -1,6 +1,6 @@
 import 'package:example/pages/tab_view_demo/flavor.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router_url_params/go_router_url_params.dart';
+import 'package:go_router_url_watcher/go_router_url_watcher.dart';
 
 class TabViewDemoPage extends StatefulWidget {
   const TabViewDemoPage({super.key});

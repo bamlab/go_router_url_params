@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:go_router_url_params/go_router_url_params.dart';
+import 'package:go_router_url_watcher/go_router_url_watcher.dart';
 
 // =====================================================================
 // Test models with instrumentation counters

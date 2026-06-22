@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router_url_params/src/serialization_utils.dart';
+import 'package:go_router_url_watcher/src/serialization_utils.dart';
 
 void main() {
   test('flatten maps', () async {
