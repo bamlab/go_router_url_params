@@ -21,7 +21,7 @@ Path counter(Person person, {Uri? currentUri}) => Path(
 );
 
 Path tabViewDemo(Flavor flavor) => Path(
-  '/tabViewDemo/:${Flavor.flavorParamName}',
+  '/tabViewDemo/:${Flavor.urlParamName}',
   '/tabViewDemo/${flavor.name}',
   'tabViewDemo',
 );

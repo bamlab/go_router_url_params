@@ -6,7 +6,7 @@ enum Flavor {
   chocolate,
   vanilla;
 
-  static String get flavorParamName => 'flavor';
+  static String get pathParamName => 'flavor';
   static Flavor get defaultFlavor => Flavor.strawberries;
 
   /// How to get a Flavor from any String
@@ -22,14 +22,14 @@ enum Flavor {
 
   static Flavor? watchFromUrl(BuildContext context) {
     return context.watchPathParamFromKey<Flavor>(
-      Flavor.flavorParamName,
+      Flavor.pathParamName,
       parseFromString: Flavor.parseFromString,
     );
   }
 
   static void setInUrl(BuildContext context, Flavor flavor) {
     context.setUrlParamsFromMap(
-      pathParams: {Flavor.flavorParamName: flavor.name},
+      pathParams: {Flavor.pathParamName: flavor.name},
     );
   }
 }

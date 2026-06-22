@@ -18,7 +18,7 @@ final router = GoRouter(
           builder: (context, state) => CounterPage(),
         ),
         GoRoute(
-          path: tabViewDemo(Flavor.defaultFlavor).path,
+          path: '/tabViewDemo/:${Flavor.pathParamName}',
           name: tabViewDemo(Flavor.defaultFlavor).name,
           builder: (context, state) => TabViewDemoPage(),
         ),
